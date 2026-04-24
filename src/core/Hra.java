@@ -1,7 +1,7 @@
-package Core;
+package core;
 
-import Players.Hrac;
-import Weapons.Strela;
+import players.Hrac;
+import weapons.Strela;
 
 import java.util.ArrayList;
 import java.awt.Image;
@@ -114,12 +114,12 @@ public class Hra extends JPanel implements ActionListener, KeyListener {
          * priradenie obrázkov ako ikony za stvorce
          * getClass().getResource je implementovaný class loader pridaný aby sa obrazky načítavali spravne mimo blueJ
          */
-        this.stena = new ImageIcon(getClass().getResource("/Images/stena.png")).getImage();
-        this.naboj = new ImageIcon(getClass().getResource("/Images/naboje.png")).getImage();
-        this.hrac1Vpravo = new ImageIcon(getClass().getResource("/Images/hrac1Vpravo.png")).getImage();
-        this.hrac1Vlavo = new ImageIcon(getClass().getResource("/Images/hrac1Vlavo.png")).getImage();
-        this.hrac2Vpravo = new ImageIcon(getClass().getResource("/Images/hrac2Vpravo.png")).getImage();
-        this.hrac2Vlavo = new ImageIcon(getClass().getResource("/Images/hrac2Vlavo.png")).getImage();
+        this.stena = new ImageIcon(getClass().getResource("/images/stena.png")).getImage();
+        this.naboj = new ImageIcon(getClass().getResource("/images/naboje.png")).getImage();
+        this.hrac1Vpravo = new ImageIcon(getClass().getResource("/images/hrac1Vpravo.png")).getImage();
+        this.hrac1Vlavo = new ImageIcon(getClass().getResource("/images/hrac1Vlavo.png")).getImage();
+        this.hrac2Vpravo = new ImageIcon(getClass().getResource("/images/hrac2Vpravo.png")).getImage();
+        this.hrac2Vlavo = new ImageIcon(getClass().getResource("/images/hrac2Vlavo.png")).getImage();
 
         
         this.nacitajMapu();

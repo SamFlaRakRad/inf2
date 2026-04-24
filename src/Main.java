@@ -1,4 +1,4 @@
-import Core.Menu;
+import core.Menu;
 
 /**
  * Main.

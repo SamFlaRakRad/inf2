@@ -1,4 +1,4 @@
-package Core;
+package core;
 
 /**
  * Enum trieda v ktorej vyberám pre-sety hry 

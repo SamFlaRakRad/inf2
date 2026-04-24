@@ -1,4 +1,4 @@
-package Players;
+package players;
 
 /**
  * Táto trieda vytvára hráčov.
