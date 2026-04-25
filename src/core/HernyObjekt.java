@@ -20,23 +20,34 @@ public abstract class HernyObjekt {
         this.vyska = vyska;
     }
 
-    public int getX() { return this.x; }
-    public int getY() { return this.y; }
-    public int getSirka() { return this.sirka; }
-    public int getVyska() { return this.vyska; }
-    public Image getObrazok() { return this.obrazok; }
+    public int getX() {
+        return this.x;
+    }
+    public int getY() {
+        return this.y;
+    }
+    public int getSirka() {
+        return this.sirka;
+    }
+    public int getVyska() {
+        return this.vyska;
+    }
+    public Image getObrazok() {
+        return this.obrazok;
+    }
 
-    public void setX(int x) { this.x = x; }
-    public void setY(int y) { this.y = y; }
-    public void setObrazok(Image obrazok) { this.obrazok = obrazok; }
+    public void setX(int x) {
+        this.x = x;
+    }
+    public void setY(int y) {
+        this.y = y;
+    }
+    public void setObrazok(Image obrazok) {
+        this.obrazok = obrazok;
+    }
 
     public abstract void pohyb();
 
-    /**
-     * Abstraktná metóda vykresľovania - každý podtyp sa nakreslí inak.
-     * Stena nakreslí textúru, hráč nakreslí sprite, PowerUp nakreslí ikonu.
-     * Toto je jadro polymorfizmu cez paint().
-     */
     public abstract void paint(Graphics g);
 
     /**
@@ -49,5 +60,7 @@ public abstract class HernyObjekt {
                 this.y + this.vyska > volaco.y;
     }
 
-    public abstract boolean dotyk(HernyObjekt objekt);
+    public boolean dotyk(HernyObjekt objekt) {
+        return this.koliduje(objekt);
+    }
 }

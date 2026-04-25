@@ -27,8 +27,6 @@ public class Singleplayer extends RezimHry {
         this.zasobnikHraca = ZASOBNIK_MAX;
     }
 
-    // ── Abstraktné metódy ─────────────────────────────────────────────────
-
     @Override
     protected void nacitajPostavy() {
         this.hrac1Vpravo = new ImageIcon(getClass().getResource("/images/hrac1Vpravo.png")).getImage();
@@ -51,9 +49,6 @@ public class Singleplayer extends RezimHry {
         if (this.boss != null && this.hrac != null) this.boss.setCiel(this.hrac);
     }
 
-    /**
-     * Pohyb hráča (klávesy) + pohyb bossa (AI k hráčovi).
-     */
     @Override
     protected void pohybPostavami() {
         if (this.hrac == null || this.boss == null) return;
@@ -65,7 +60,7 @@ public class Singleplayer extends RezimHry {
         this.boss.pohybSa();
         this.aplikujPohybSKolizou(this.boss, this.boss.getPohybX(), this.boss.getPohybY());
 
-        // Navádzacie strely sledujú hráča
+        // Navádzacie strely sledujú hráča každý tick
         for (Strela s : this.strely) {
             if (s.getTyp() == Strela.TypStrely.RAKETA)
                 s.aktualizujCiel(this.hrac.getX(), this.hrac.getY());
@@ -73,35 +68,38 @@ public class Singleplayer extends RezimHry {
     }
 
     /**
-     * Hráč strieľa manuálne, Boss strieľa AI fázovo.
-     * Boss.utoc() volí normal/spread/raketa podľa HP fázy - polymorfizmus.
+     * POLYMORFIZMUS: utoc() cez Postava interface.
+     * hrac.utoc()  → 1 normálna strela.
+     * boss.utoc()  → normal / spread / raketa podľa HP fázy.
      */
     @Override
     protected void spracujUtok() {
         if (this.hrac == null || this.boss == null) return;
-        // Hráč - manuálne
+
         if (this.hrac.getVystrelena() && this.zasobnikHraca > 0) {
             int pred = this.strely.size();
             this.hrac.utoc(this.boss.getX(), this.boss.getY(), this.strely);
             if (this.strely.size() > pred) this.zasobnikHraca--;
         }
-        // Boss - AI, Postava.utoc() polymorfne
+
         if (this.boss.mozeUtocit()) {
             this.boss.utoc(this.hrac.getX(), this.hrac.getY(), this.strely);
         }
     }
 
     /**
-     * Strela hráča (strana 0) trafí bossa, bossova (strana 1) trafí hráča.
-     * dostaZasah() je Postava.dostaZasah() - Boss.dostaZasah() môže zmeniť fázu.
+     * Strela hráča (strana 0) trafí bossa.
+     * Bossova strela (strana 1) trafí hráča.
+     * Boss.dostaZasah() môže zmeniť fázu — polymorfizmus.
      */
     @Override
     protected void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela) {
+        if (this.boss == null || this.hrac == null) return;
         if (strela.getStrana() == 0 && strela.koliduje(this.boss)) {
-            this.boss.dostaZasah(1); // Postava.dostaZasah() - boss sa môže rozzúriť
+            this.boss.dostaZasah(1);
             it.remove();
         } else if (strela.getStrana() == 1 && strela.koliduje(this.hrac)) {
-            this.hrac.dostaZasah(1); // Postava.dostaZasah()
+            this.hrac.dostaZasah(1);
             it.remove();
         }
     }
@@ -112,21 +110,28 @@ public class Singleplayer extends RezimHry {
         if (this.hrac != null && !this.hrac.jeZiva()) { this.bossVyhral = true; this.stopnutaHra = true; }
     }
 
+    /**
+     * POLYMORFIZMUS: Zberatelny.pouzi(Postava).
+     * Heal.pouzi() → HP+1, Speed.pouzi() → rýchlosť+3.
+     */
+    @Override
+    protected void skontrolujPickupy() {
+        if (this.hrac == null) return;
+        for (Zberatelny z : this.pickupy) {
+            if (!z.jeZobrany() && this.hrac.koliduje((HernyObjekt) z)) z.pouzi(this.hrac);
+        }
+        this.pickupy.removeIf(Zberatelny::jeZobrany);
+    }
+
     @Override
     protected void kresliHUD(Graphics g) {
         if (this.hrac != null) {
             this.hrac.paint(g);
-            // HP hráča ako bodky
-            for (int i = 0; i < this.hrac.getHP(); i++) {
-                g.setColor(Color.RED);
+            g.setColor(Color.RED);
+            for (int i = 0; i < this.hrac.getHP(); i++)
                 g.fillRect(20 + i * 14, 645, 10, 10);
-            }
         }
-        if (this.boss != null) this.boss.paint(g); // Boss.paint() kreslí HP bar + RAGE
-
-        // Pickupy
-        for (Zberatelny z : this.pickupy)
-            if (z instanceof HernyObjekt) ((HernyObjekt) z).paint(g);
+        if (this.boss != null) this.boss.paint(g);
 
         g.setFont(new Font("Arial", Font.BOLD, 18));
         g.setColor(Color.BLACK);
@@ -136,22 +141,15 @@ public class Singleplayer extends RezimHry {
 
         if      (this.hracVyhral) { g.setFont(new Font("Arial", Font.BOLD, 50)); g.setColor(new Color(0,150,0)); g.drawString("VYHRAL SI!", 230, 350); }
         else if (this.bossVyhral) { g.setFont(new Font("Arial", Font.BOLD, 50)); g.setColor(Color.RED);          g.drawString("BOSS VYHRAL!", 180, 350); }
-        if (this.stopnutaHra) { g.setFont(new Font("Arial", Font.BOLD, 30)); g.setColor(Color.DARK_GRAY); g.drawString("ESC = restart", 270, 420); }
-    }
-
-    @Override
-    protected void skontrolujPickupy() {
-        if (this.hrac == null) return;
-        for (Zberatelny z : this.pickupy) {
-            if (!z.jeZobrany() && this.hrac.koliduje((HernyObjekt) z)) {
-                z.pouzi(this.hrac); // Zberatelny.pouzi(Postava) polymorfne
-            }
+        if (this.stopnutaHra) {
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            g.setColor(Color.DARK_GRAY);
+            g.drawString("ESC = restart", 270, 420);
         }
-        this.pickupy.removeIf(Zberatelny::jeZobrany);
     }
 
     @Override
-    protected void keyPressedExtra(java.awt.event.KeyEvent e) {
+    protected void keyPressedExtra(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE && this.hrac != null) this.hrac.vystrel();
     }
 
@@ -164,8 +162,9 @@ public class Singleplayer extends RezimHry {
         this.nacitajPostavy();
         this.pridajPickupy();
         this.zasobnikHraca = ZASOBNIK_MAX;
-        this.hracVyhral = false; this.bossVyhral = false;
-        this.stopnutaHra = false;
+        this.hracVyhral    = false;
+        this.bossVyhral    = false;
+        this.stopnutaHra   = false;
         this.gameLoop.start();
     }
 
@@ -173,10 +172,8 @@ public class Singleplayer extends RezimHry {
         int nx = obj.getX() + dx;
         int ny = obj.getY() + dy;
         obj.setX(nx); obj.setY(ny);
-        for (HernyObjekt stena : this.steny) {
-            if (obj.koliduje(stena)) {
-                obj.setX(nx - dx); obj.setY(ny - dy); break;
-            }
+        for (Stvorec stena : this.steny) {
+            if (obj.koliduje(stena)) { obj.setX(nx - dx); obj.setY(ny - dy); break; }
         }
     }
 }

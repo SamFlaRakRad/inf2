@@ -25,31 +25,29 @@ import java.awt.event.KeyEvent;
  */
 public abstract class RezimHry extends JPanel implements ActionListener, KeyListener {
 
-    protected static final int RIADKY    = 20;
-    protected static final int STLPCE    = 25;
-    protected static final int VELKOST_S = 32;
 
-    // ── Zdieľané kolekcie ────────────────────────────────────────────────
-    protected ArrayList<Stvorec> steny;
-    protected ArrayList<Strela>      strely;
-    protected ArrayList<Zberatelny>  pickupy;
 
-    protected boolean[] stlaceneKlavesy = new boolean[256];
-    protected boolean stopnutaHra = false;
+    private final int riadky = 20;
+    private final int stlpce = 25;
+    private static final int VELKOST_S = 32;
 
-    protected String[]    mapa;
-    protected Obtiaznost  obtiaznost;
-    protected Timer       gameLoop;
+    private ArrayList<Stvorec> steny;
+    private ArrayList<Strela> strely;
+    private ArrayList<Zberatelny> pickupy;
 
-    protected Image obrazokSteny;
+    private boolean[] stlaceneKlavesy = new boolean[256];
+    private boolean stopnutaHra = false;
 
-    /**
-     * Konštruktor - inicializuje zdieľané kolekcie, načíta mapu, spustí loop.
-     */
+    private String[] mapa;
+    private Obtiaznost obtiaznost;
+    private Timer gameLoop;
+
+    private Image obrazokSteny;
+
     public RezimHry(Obtiaznost obtiaznost) {
         this.obtiaznost = obtiaznost;
-        this.steny   = new ArrayList<>();
-        this.strely  = new ArrayList<>();
+        this.steny = new ArrayList<>();
+        this.strely = new ArrayList<>();
         this.pickupy = new ArrayList<>();
 
         this.addKeyListener(this);
@@ -61,151 +59,98 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         this.mapa = gen.vytvorMapu(obtiaznost);
 
         this.nacitajSteny();
-        this.nacitajPostavy();   // abstraktné - každý mód inak
+        this.nacitajPostavy();
         this.pridajPickupy();
 
         this.gameLoop = new Timer(35, this);
         this.gameLoop.start();
     }
 
+    // ── Abstraktné metódy ─────────────────────────────────────────────────
 
     protected abstract void nacitajPostavy();
-
-    /** Pohybuje postavami - Multiplayer: pohybSa() na hráčoch, Single: + boss AI */
     protected abstract void pohybPostavami();
-
-    /** Spracuje útok postáv - Multiplayer: obaja hráči, Single: hráč + boss fázy */
     protected abstract void spracujUtok();
-
-    /** Kolízie striel s postavami - líši sa kto koho môže trafiť */
     protected abstract void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela);
-
-
-    /** Vykreslí HUD - Multiplayer: ammo, Single: HP bar, boss fáza */
     protected abstract void kresliHUD(Graphics g);
-
-    /** Skontroluje podmienky konca hry */
     protected abstract void skontrolujKoniec();
-
-    /** Reštart konkrétneho módu */
     protected abstract void restart();
+    protected abstract void skontrolujPickupy();
 
-    // ── Zdieľaný herný cyklus ────────────────────────────────────────────
+    // ── Zdieľaný herný cyklus ─────────────────────────────────────────────
 
-    /**
-     * Herný cyklus - rovnaký pre oba módy.
-     * Abstraktné metódy sa vykonajú polymorfne podľa toho, či je to Multi alebo Single.
-     */
     @Override
     public final void actionPerformed(ActionEvent e) {
         if (!this.stopnutaHra) {
-            this.pohybPostavami();            // abstract
-            this.pohybStriel();               // zdieľané
-            this.spracujUtok();               // abstract
-            this.skontrolujStenoveKolizie();  // zdieľané
-            this.skontrolujKoniec();          // abstract
-            this.skontrolujPickupy();         // zdieľané
+            this.pohybPostavami();
+            this.pohybStriel();
+            this.spracujUtok();
+            this.skontrolujStenoveKolizie();
+            this.skontrolujKoniec();
+            this.skontrolujPickupy();
         }
         this.repaint();
         if (this.stopnutaHra) this.gameLoop.stop();
     }
 
-    // ── Zdieľaná logika ─────────────────────────────────────────────────
-
-    /**
-     * Načíta steny z mapy - rovnaké pre oba módy.
-     */
     protected void nacitajSteny() {
         this.steny.clear();
-        for (int r = 0; r < RIADKY; r++) {
-            for (int s = 0; s < STLPCE; s++) {
+        for (int r = 0; r < this.riadky; r++) {
+            for (int s = 0; s < this.stlpce; s++) {
                 if (this.mapa[r].charAt(s) == 'X') {
-                    int x = s * VELKOST_S;
-                    int y = r * VELKOST_S;
-                    this.steny.add(new Stvorec(this.obrazokSteny, x, y, VELKOST_S, VELKOST_S));
+                    this.steny.add(new Stvorec(this.obrazokSteny,
+                            s * VELKOST_S, r * VELKOST_S,
+                            VELKOST_S, VELKOST_S));
                 }
             }
         }
     }
 
-    /**
-     * Posunie všetky strely - rovnaké pre oba módy.
-     */
     protected void pohybStriel() {
         for (Strela s : this.strely) s.pohyb();
     }
 
     /**
-     * Kontrola kolízie striel so stenami - rovnaká pre oba módy.
-     * Kolízie s postavami sú abstraktné (iné pre každý mód).
+     * Kolízie striel so stenami (zdieľané) + s postavami (abstraktné).
      */
     protected void skontrolujStenoveKolizie() {
         Iterator<Strela> it = this.strely.iterator();
         while (it.hasNext()) {
             Strela strela = it.next();
 
-            // Kolízia so stenou - zdieľané
             boolean trafenaStena = false;
-            for (HernyObjekt stena : this.steny) {
+            for (Stvorec stena : this.steny) {
                 if (strela.koliduje(stena)) { trafenaStena = true; break; }
             }
             if (trafenaStena) { it.remove(); continue; }
 
-            // Kolízia s postavami - abstraktné (každý mód rozhodne kto koho trafí)
             this.skontrolujPostaveKolizie(it, strela);
         }
     }
 
-    /**
-     * Spracovanie pickupov - rovnaké pre oba módy.
-     * Polymorfizmus cez Zberatelny: pouzi() je Heal alebo Speed, hra nerozlišuje.
-     * pouzi() berie Postava - môže teda použiť hráč aj boss.
-     */
-    protected void skontrolujPickupy() {
-        // Konkrétne postavy poskytnú podtriedy, tu len definujeme vzor
-        // - zavolá sa z podtried s konkrétnym zoznamom postáv
-    }
-
-    /**
-     * Pridá pickupy na mapu - rovnaké pre oba módy.
-     * Podtriedy môžu override-núť pre iné rozmiestnenie.
-     */
     protected void pridajPickupy() {
         this.pickupy.clear();
-        // Predvolené pozície - podtriedy môžu override-núť
         int[][] pos = {{3, 5}, {15, 18}, {8, 12}, {12, 3}};
         for (int i = 0; i < pos.length; i++) {
-            int x = pos[i][0] * VELKOST_S;
-            int y = pos[i][1] * VELKOST_S;
-            // Heal a Speed sa striedajú
             this.pickupy.add(i % 2 == 0
-                    ? new Heal(null, x, y, VELKOST_S)
-                    : new Speed(null, x, y, VELKOST_S));
+                    ? new Heal(null,  pos[i][0] * VELKOST_S, pos[i][1] * VELKOST_S, VELKOST_S)
+                    : new Speed(null, pos[i][0] * VELKOST_S, pos[i][1] * VELKOST_S, VELKOST_S));
         }
     }
 
-    // ── Zdieľané vykresľovanie ───────────────────────────────────────────
+    // ── Zdieľané vykresľovanie ────────────────────────────────────────────
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        // Steny - rovnaké pre oba módy
-        for (HernyObjekt s : this.steny)  s.paint(g);
-
-        // Pickupy - polymorfné: Heal nakreslí "+", Speed nakreslí ">>"
-        for (Zberatelny z : this.pickupy) {
+        for (Stvorec s : this.steny)     s.paint(g);
+        for (Zberatelny z : this.pickupy)
             if (z instanceof HernyObjekt) ((HernyObjekt) z).paint(g);
-        }
-
-        // Strely - polymorfné: NORMALNA/BOSS_SPREAD/RAKETA vyzerajú inak
-        for (Strela s : this.strely) s.paint(g);
-
-        // HUD - abstraktné (každý mód kreslí iné info)
+        for (Strela s : this.strely)     s.paint(g);
         this.kresliHUD(g);
     }
 
-    // ── Zdieľaná klávesnica ──────────────────────────────────────────────
+    // ── Zdieľaná klávesnica ───────────────────────────────────────────────
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -221,8 +166,49 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         if (kod < 256) this.stlaceneKlavesy[kod] = false;
     }
 
-    @Override public void keyTyped(KeyEvent e) {}
+    @Override
+    public void keyTyped(KeyEvent e) {
 
-    /** Podtriedy môžu pridať vlastné key handling (napr. streľba hráča) */
-    protected void keyPressedExtra(KeyEvent e) {}
+    }
+
+    protected void keyPressedExtra(KeyEvent e) {
+
+    }
+
+    public ArrayList<Stvorec> getSteny() {
+        return this.steny;
+    }
+
+    public ArrayList<Strela> getStrely() {
+        return this.strely;
+    }
+
+    public ArrayList<Zberatelny> getPickupy() {
+        return this.pickupy;
+    }
+
+    public boolean[] getStlaceneKlavesy() {
+        return this.stlaceneKlavesy;
+    }
+
+    public boolean isStopnutaHra() {
+        return this.stopnutaHra;
+    }
+
+    public String[] getMapa() {
+        return this.mapa;
+    }
+
+    public Obtiaznost getObtiaznost() {
+        return this.obtiaznost;
+    }
+
+    public int getRiadky() {
+        return this.riadky;
+    }
+
+    public int getStlpce() {
+        return this.stlpce;
+    }
+
 }
