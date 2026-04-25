@@ -3,11 +3,11 @@ package core;
 import java.awt.*;
 
 public abstract class HernyObjekt {
-    protected int x;
-    protected int y;
-    protected int sirka;
-    protected int vyska;
-    protected Image obrazok;
+    private int x;
+    private int y;
+    private int sirka;
+    private int vyska;
+    private Image obrazok;
 
     /**
      * Konštruktor
@@ -30,6 +30,8 @@ public abstract class HernyObjekt {
     public void setY(int y) { this.y = y; }
     public void setObrazok(Image obrazok) { this.obrazok = obrazok; }
 
+    public abstract void pohyb();
+
     /**
      * Abstraktná metóda vykresľovania - každý podtyp sa nakreslí inak.
      * Stena nakreslí textúru, hráč nakreslí sprite, PowerUp nakreslí ikonu.
@@ -38,14 +40,13 @@ public abstract class HernyObjekt {
     public abstract void paint(Graphics g);
 
     /**
-     * AABB kolízia - zdieľaná logika pre všetkých potomkov.
      * Axis-Aligned Bounding Box collision detection.
      */
-    public boolean koliduje(HernyObjekt iný) {
-        return this.x < iný.x + iný.sirka &&
-                this.x + this.sirka > iný.x &&
-                this.y < iný.y + iný.vyska &&
-                this.y + this.vyska > iný.y;
+    public boolean koliduje(HernyObjekt volaco) {
+        return this.x < volaco.x + volaco.sirka &&
+                this.x + this.sirka > volaco.x &&
+                this.y < volaco.y + volaco.vyska &&
+                this.y + this.vyska > volaco.y;
     }
 
     public abstract boolean dotyk(HernyObjekt objekt);

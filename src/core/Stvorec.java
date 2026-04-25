@@ -17,18 +17,23 @@ public class Stvorec extends HernyObjekt {
         super(obrazok, x, y, stranaA, stranaA);
     }
 
+    @Override
+    public void pohyb() {
+
+    }
+
     /**
      * Getter pre stranu (zachovaná kompatibilita s pôvodným kódom)
      */
     public int getStranaA() {
-        return this.sirka;
+        return this.getSirka();
     }
 
     /**
      * Setter pre obrázok (zachovaná kompatibilita)
      */
     public void setImage(Image obrazok) {
-        this.obrazok = obrazok;
+        this.setObrazok(obrazok);
     }
 
     /**
@@ -38,7 +43,7 @@ public class Stvorec extends HernyObjekt {
      */
     @Override
     public void paint(Graphics g) {
-        g.drawImage(this.obrazok, this.x, this.y, this.sirka, this.vyska, null);
+        g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
     }
 
     /**

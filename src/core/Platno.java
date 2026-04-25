@@ -1,7 +1,10 @@
 package core;
 
+import weapons.Strela;
+
 import javax.swing.JFrame;
-import java.awt.Dimension;
+import java.awt.*;
+import java.util.Iterator;
 
 /**
  * Vytvorenie plátna na ktorom sa bude hra hrať.
@@ -29,23 +32,27 @@ public class Platno {
     private int vyskaPlatna = this.RIADKY * this.VELKOST_S;
     
     private Obtiaznost obtaznost;
+    private TypHry typ;
+    private TypEnemaka typEnemaka;
     /**
      * Constructor for objects of class Platno
      */
     
-    public Platno(Obtiaznost obtaznost) {
+    public Platno(Obtiaznost obtaznost, TypHry typ, TypEnemaka typEnemaka) {
         this.obtaznost = obtaznost;
-        
+        this.typ = typ;
+
         JFrame platno = new JFrame();  
         platno.setSize(this.sirkaPlatna, this.vyskaPlatna); 
         platno.setResizable(false); 
         platno.setLocationRelativeTo(null); 
         platno.setPreferredSize(new Dimension(this.sirkaPlatna, this.vyskaPlatna)); 
         platno.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        Hra hra = new Hra(obtaznost); 
-        platno.add(hra);
-        hra.requestFocus();
+
+
+        //RezimHry hra = new RezimHry(obtaznost.getVybrataObtaznost());
+        //platno.add(hra);
+        //hra.requestFocus();
         platno.pack();
         platno.setVisible(true);
         

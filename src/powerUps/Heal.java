@@ -21,15 +21,12 @@ public class Heal extends PowerUp {
     }
 
     @Override
+    public void pohyb() {
+
+    }
+
+    @Override
     public void paint(Graphics g) {
-        if (this.obrazok != null) {
-            super.paint(g);
-            return;
-        }
-        g.setColor(new Color(50, 200, 50));
-        g.fillRoundRect(this.x, this.y, this.sirka, this.vyska, 6, 6);
-        g.setColor(Color.WHITE);
-        g.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
-        g.drawString("+", this.x + this.sirka / 2 - 5, this.y + this.vyska / 2 + 6);
+        if (this.getObrazok() != null) g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
     }
 }

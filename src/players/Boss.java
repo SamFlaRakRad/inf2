@@ -49,8 +49,8 @@ public class Boss extends HernyObjekt implements Postava {
     public void pohybSa() {
         if (this.ciel == null) return;
 
-        int dx = this.ciel.getX() - this.x;
-        int dy = this.ciel.getY() - this.y;
+        int dx = this.ciel.getX() - this.getX();
+        int dy = this.ciel.getY() - this.getY();
         double vzdialenost = Math.sqrt(dx * dx + dy * dy);
 
         if (vzdialenost > 0) {
@@ -99,16 +99,16 @@ public class Boss extends HernyObjekt implements Postava {
 
     private void vypalisNormalnu(int cielX, int cielY, java.util.List<Strela> strely) {
         double[] smer = this.vypocitajSmer(cielX, cielY, 7.0);
-        int cx = this.x + this.sirka / 2;
-        int cy = this.y + this.sirka / 2;
+        int cx = this.getX() + this.getSirka() / 2;
+        int cy = this.getY() + this.getSirka() / 2;
         strely.add(new Strela(cx, cy, smer[0], smer[1], 1, Strela.TypStrely.NORMALNA));
     }
 
     private void vypalisSpread(int cielX, int cielY, java.util.List<Strela> strely) {
         // 3 strely - priamo, -20°, +20°
         double[] uhly = {-0.35, 0, 0.35};
-        int cx = this.x + this.sirka / 2;
-        int cy = this.y + this.sirka / 2;
+        int cx = this.getX() + this.getSirka() / 2;
+        int cy = this.getY() + this.getSirka() / 2;
         for (double uhol : uhly) {
             double[] smer = this.vypocitajSmer(cielX, cielY, 6.0);
             double cos = Math.cos(uhol);
@@ -121,16 +121,16 @@ public class Boss extends HernyObjekt implements Postava {
 
     private void vypalisRaketu(int cielX, int cielY, java.util.List<Strela> strely) {
         double[] smer = this.vypocitajSmer(cielX, cielY, 4.0);
-        int cx = this.x + this.sirka / 2;
-        int cy = this.y + this.sirka / 2;
+        int cx = this.getX() + this.getSirka() / 2;
+        int cy = this.getY() + this.getSirka() / 2;
         Strela raketa = new Strela(cx, cy, smer[0], smer[1], 1, Strela.TypStrely.RAKETA);
         raketa.setCiel(cielX, cielY);
         strely.add(raketa);
     }
 
     private double[] vypocitajSmer(int cielX, int cielY, double rychlost) {
-        double dx = cielX - this.x;
-        double dy = cielY - this.y;
+        double dx = cielX - this.getX();
+        double dy = cielY - this.getY();
         double d = Math.sqrt(dx * dx + dy * dy);
         if (d == 0) return new double[]{rychlost, 0};
         return new double[]{(dx / d) * rychlost, (dy / d) * rychlost};
@@ -191,6 +191,11 @@ public class Boss extends HernyObjekt implements Postava {
 
     // ── Paint ────────────────────────────────────────────────────────────
 
+    @Override
+    public void pohyb() {
+
+    }
+
     /**
      * Boss sa nakreslí inak v každej fáze.
      * Fáza 1: červené telo.
@@ -198,31 +203,7 @@ public class Boss extends HernyObjekt implements Postava {
      */
     @Override
     public void paint(Graphics g) {
-        if (this.obrazok != null) {
-            g.drawImage(this.obrazok, this.x, this.y, this.sirka, this.vyska, null);
-        } else {
-            // Kreslíme bossa geometricky ak nie je sprite
-            Color bossColor = (this.faza == 2) ? new Color(160, 0, 0) : new Color(200, 30, 30);
-            g.setColor(bossColor);
-            g.fillRect(this.x, this.y, this.sirka, this.vyska);
-            g.setColor(Color.BLACK);
-            g.drawRect(this.x, this.y, this.sirka, this.vyska);
-        }
 
-        // HP bar
-        int barW = this.sirka;
-        int filled = (int)((double) this.hp / MAX_HP * barW);
-        g.setColor(Color.DARK_GRAY);
-        g.fillRect(this.x, this.y - 12, barW, 8);
-        g.setColor(this.faza == 2 ? Color.ORANGE : Color.GREEN);
-        g.fillRect(this.x, this.y - 12, filled, 8);
-
-        // Fáza 2: "RAGE!" nápis nad bossom
-        if (this.faza == 2) {
-            g.setColor(Color.RED);
-            g.setFont(new Font("Arial", Font.BOLD, 12));
-            g.drawString("RAGE!", this.x + 4, this.y - 16);
-        }
     }
 
     @Override

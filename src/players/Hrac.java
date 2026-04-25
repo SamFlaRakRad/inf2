@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class Hrac extends HernyObjekt implements Postava {
     private char smerObr;
-    private int pohybX = 0;
-    private int pohybY = 0;
+    int pohybX = 0;
+    int pohybY = 0;
     private boolean vystrelenaStrela = false;
 
     protected int x = 0;
@@ -139,6 +139,11 @@ public class Hrac extends HernyObjekt implements Postava {
     }
 
     @Override
+    public void resetCooldown() {
+
+    }
+
+    @Override
     public void dostaZasah(int poskodenie) {
         this.hp -= poskodenie;
         if (this.hp < 0) this.hp = 0;
@@ -250,6 +255,11 @@ public class Hrac extends HernyObjekt implements Postava {
 
     public void setObrazok(Image img) {
         this.obrazok = img;
+    }
+
+    @Override
+    public void pohyb() {
+
     }
 
     public Image getObrazok() {

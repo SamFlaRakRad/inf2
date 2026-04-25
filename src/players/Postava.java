@@ -5,6 +5,10 @@ import weapons.Strela;
 import java.util.List;
 
 public interface Postava {
+    void resetCooldown();
+
+    void dostaZasah(int poskodenie);
+
     void vystrel();
 
     int getHP();
@@ -19,6 +23,10 @@ public interface Postava {
     void dostanZasah(int poskodenie);
 
     boolean jeZiva();
+
+    void pohybSa();
+
+    int getRychlost();
 
     /**
      * Vykoná útok a pridá strely do zdieľaného zoznamu.

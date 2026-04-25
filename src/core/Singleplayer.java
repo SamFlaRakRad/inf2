@@ -1,6 +1,8 @@
 package core;
 
+import players.Boss;
 import players.Hrac;
+import powerUps.Zberatelny;
 import weapons.Strela;
 
 import javax.swing.*;

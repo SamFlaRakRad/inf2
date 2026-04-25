@@ -39,11 +39,11 @@ public class Bot extends Hrac implements Postava {
         if (Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
                 this.pohybX = this.rychlost;
-                this.smerObr = 'R';
+                this.setSmerObr('R');
             }
             else {
                 this.pohybX = -this.rychlost;
-                this.smerObr = 'L';
+                this.setSmerObr('L');
             }
         } else {
             if (dy > 0) this.pohybY = this.rychlost;

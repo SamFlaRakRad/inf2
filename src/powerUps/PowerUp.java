@@ -34,6 +34,8 @@ public abstract class PowerUp extends HernyObjekt implements Zberatelny {
 
     @Override
     public void paint(Graphics g) {
-        if (this.obrazok != null) g.drawImage(this.obrazok, this.x, this.y, this.sirka, this.vyska, null);
+        if (this.getObrazok() != null) {
+            g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
+        }
     }
 }
