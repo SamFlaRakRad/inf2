@@ -1,74 +1,52 @@
 package core;
 
-import java.awt.Image;
+import java.awt.*;
+
 /**
  * Táto trieda vytvára štvorce z vlastnými obrazkami ktoré umiestňuje na plátno 
  * 
  * @author (Samuel Ďuriš) 
  * @version (V3)
  */
-public class Stvorec {
-    private int x;
-    private int y;
-    private int stranaA;
-    private int stranaB;
-    private Image obrazok;
+public class Stvorec extends HernyObjekt {
+
     /**
      * Konštruktor triedy Stvorec
      */
     public Stvorec(Image obrazok, int x, int y, int stranaA, int stranaB) {
-        this.obrazok = obrazok;
-        this.x = x;
-        this.y = y;
-        this.stranaA = stranaA;
+        super(obrazok, x, y, stranaA, stranaA);
     }
-    
+
     /**
-     * Getter pre stranu štvorca
+     * Getter pre stranu (zachovaná kompatibilita s pôvodným kódom)
      */
     public int getStranaA() {
-        return this.stranaA;
+        return this.sirka;
     }
-    
+
     /**
-     * Getter pre x-ovu pozíciu štvorca
-     */
-    public int getX() {
-        return this.x;
-    }
-    
-    /**
-     * Getter pre y-ovu pozíciu štvorca
-     */
-    public int getY() {
-        return this.y;
-    }
-    
-    /**
-     * Getter pre obrázok štvorca
-     */
-    public Image getObrazok() {
-        return this.obrazok;
-    }
-    
-    /**
-     * Setter pre obrázok štvorca
+     * Setter pre obrázok (zachovaná kompatibilita)
      */
     public void setImage(Image obrazok) {
         this.obrazok = obrazok;
     }
-    
+
     /**
-     * Setter pre x-ovu pozíciu štvorca
+     * Polymorfné vykresľovanie - Stvorec nakreslí svoj obrázok.
+     * Rovnaké volanie paint(g) na Hrac nakreslí sprite hráča,
+     * tu nakreslí stenu alebo náboj.
      */
-    public void setX(int x) {
-        this.x = x;
+    @Override
+    public void paint(Graphics g) {
+        g.drawImage(this.obrazok, this.x, this.y, this.sirka, this.vyska, null);
     }
-    
+
     /**
-     * Setter pre y-ovu pozíciu štvorca
+     * Implementácia rozhrania Kolizie.
+     * Polymorfizmus: Hra môže zavolať dotyk() na hocakom Kolizie objekte.
      */
-    public void setY(int y) {
-        this.y = y;
+    @Override
+    public boolean dotyk(HernyObjekt objekt) {
+        return this.koliduje(objekt);
     }
 }
