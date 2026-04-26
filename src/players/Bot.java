@@ -10,47 +10,28 @@ public class Bot extends Hrac implements Postava {
     private HernyObjekt ciel;
 
     public Bot(Image obrazok, int x, int y, int velkost, boolean[] stlaceneKlavesy) {
-        super(obrazok, x, y, velkost, 'L', -1, -1, -1, -1, -1, stlaceneKlavesy);
-        this.x = x;
-        this.y = y;
-        this.sirka = velkost;
-        this.vyska = velkost;
-        this.obrazok = obrazok;
+        super(obrazok, x, y, velkost, 'L', -1, -1, -1, -1, -1, stlaceneKlavesy, 1);
     }
 
-    public void sledujCiel(Hrac ciel) {
-        this.ciel = ciel;
-    }
+    public void sledujCiel(HernyObjekt ciel) { this.ciel = ciel; }
 
-    /**
-     * OVERRIDE pohybSa() — polymorfná metóda.
-     * Hrac.pohybSa() číta klávesy.
-     * Bot.pohybSa()  nasleduje cieľ bez klávesnice.
-     */
     @Override
     public void pohybSa() {
         if (this.ciel == null) return;
-        this.pohybX = 0;
-        this.pohybY = 0;
+        this.setPohybX(0);
+        this.setPohybY(0);
 
-        int dx = this.ciel.getX() - this.x;
-        int dy = this.ciel.getY() - this.y;
+        int dx = this.ciel.getX() - this.getX();
+        int dy = this.ciel.getY() - this.getY();
 
         if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) {
-                this.pohybX = this.rychlost;
-                this.setSmerObr('R');
-            }
-            else {
-                this.pohybX = -this.rychlost;
-                this.setSmerObr('L');
-            }
+            this.setPohybX(dx > 0 ? this.getRychlost() : -this.getRychlost());
+            this.setSmerObr(dx > 0 ? 'R' : 'L');
         } else {
-            if (dy > 0) this.pohybY = this.rychlost;
-            else        this.pohybY = -this.rychlost;
+            this.setPohybY(dy > 0 ? this.getRychlost() : -this.getRychlost());
         }
 
-        if (this.cooldown > 0) this.cooldown--;
+        this.decrementCooldown();
 
         // Bot strieľa keď je blízko hráča
         if (Math.abs(dx) < 200 && Math.abs(dy) < 200) {
@@ -58,31 +39,24 @@ public class Bot extends Hrac implements Postava {
         }
     }
 
-    /**
-     * OVERRIDE utoc() — Bot strieľa smerom k hráčovi, nie podľa smerObr.
-     */
     @Override
     public void utoc(int cielX, int cielY, List<Strela> strely) {
         if (!this.mozeUtocit() || !this.getVystrelena()) return;
-        double dx = cielX - this.x;
-        double dy = cielY - this.y;
-        double d = Math.sqrt(dx * dx + dy * dy);
+        double dx = cielX - this.getX();
+        double dy = cielY - this.getY();
+        double d  = Math.sqrt(dx * dx + dy * dy);
         if (d == 0) return;
-        double rx = (dx / d) * 8;
-        double ry = (dy / d) * 8;
-        strely.add(new Strela(this.x + this.sirka / 2, this.y + this.sirka / 2,
-                rx, ry, 1, Strela.TypStrely.NORMALNA));
+        strely.add(new Strela(
+                this.getX() + this.getSirka() / 2,
+                this.getY() + this.getVyska() / 2,
+                (dx / d) * 8, (dy / d) * 8,
+                1, Strela.TypStrely.NORMALNA));
         this.resetVystrelena();
-        this.cooldown = 15;
+        this.setCooldown(20);
     }
 
     @Override
-    public int getX() {
-        return this.x;
-    }
+    public void paint(Graphics g) {
 
-    @Override
-    public int getY() {
-        return this.y;
     }
 }

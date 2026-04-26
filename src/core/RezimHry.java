@@ -25,29 +25,28 @@ import java.awt.event.KeyEvent;
  */
 public abstract class RezimHry extends JPanel implements ActionListener, KeyListener {
 
+    private final int RIADKY    = 20;
+    private final int STLPCE    = 25;
+    private final int VELKOST_S = 32;
 
-
-    private final int riadky = 20;
-    private final int stlpce = 25;
-    private static final int VELKOST_S = 32;
-
-    private ArrayList<Stvorec> steny;
-    private ArrayList<Strela> strely;
+    private ArrayList<Stvorec>   steny;
+    private ArrayList<Strela>    strely;
     private ArrayList<Zberatelny> pickupy;
 
     private boolean[] stlaceneKlavesy = new boolean[256];
-    private boolean stopnutaHra = false;
+    private boolean   stopnutaHra     = false;
 
-    private String[] mapa;
+    private String[]   mapa;
     private Obtiaznost obtiaznost;
-    private Timer gameLoop;
+    private Timer      gameLoop;
+    private Image      obrazokSteny;
 
-    private Image obrazokSteny;
+    // ── Konštruktor ───────────────────────────────────────────────────────
 
     public RezimHry(Obtiaznost obtiaznost) {
-        this.obtiaznost = obtiaznost;
-        this.steny = new ArrayList<>();
-        this.strely = new ArrayList<>();
+        this.obtiaznost  = obtiaznost;
+        this.steny   = new ArrayList<>();
+        this.strely  = new ArrayList<>();
         this.pickupy = new ArrayList<>();
 
         this.addKeyListener(this);
@@ -66,19 +65,61 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         this.gameLoop.start();
     }
 
+
+    public ArrayList<Stvorec> getSteny() {
+        return this.steny;
+    }
+    public ArrayList<Strela> getStrely() {
+        return this.strely;
+    }
+    public ArrayList<Zberatelny> getPickupy() {
+        return this.pickupy;
+    }
+    public boolean[] getStlaceneKlavesy() {
+        return this.stlaceneKlavesy;
+    }
+    public String[] getMapa() {
+        return this.mapa; }
+    public Obtiaznost getObtiaznost() {
+        return this.obtiaznost;
+    }
+    public boolean isStopnutaHra() {
+        return this.stopnutaHra;
+    }
+
+    public int getRIADKY() {
+        return this.RIADKY;
+    }
+
+    public int getSTLPCE() {
+        return this.STLPCE;
+    }
+
+    public int getVELKOST_S() {
+        return this.VELKOST_S;
+    }
+
+    public void setStopnutaHra(boolean v)   { this.stopnutaHra = v; }
+    public void setMapa(String[] m)         { this.mapa = m; }
+    public void startGameLoop()             { this.gameLoop.start(); }
+    public void stopGameLoop()              { this.gameLoop.stop(); }
+
     // ── Abstraktné metódy ─────────────────────────────────────────────────
 
-    protected abstract void nacitajPostavy();
-    protected abstract void pohybPostavami();
-    protected abstract void spracujUtok();
-    protected abstract void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela);
-    protected abstract void kresliHUD(Graphics g);
-    protected abstract void skontrolujKoniec();
-    protected abstract void restart();
-    protected abstract void skontrolujPickupy();
+    public abstract void nacitajPostavy();
+    public abstract void pohybPostavami();
+    public abstract void spracujUtok();
+    public abstract void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela);
+    public abstract void kresliHUD(Graphics g);
+    public abstract void skontrolujKoniec();
+    public abstract void restart();
 
-    // ── Zdieľaný herný cyklus ─────────────────────────────────────────────
+    // ── Herný cyklus ─────────────────────────────────────────────────────
 
+    /**
+     * actionPerformed – rovnaký pre oba módy.
+     * Abstraktné metódy sú volané polymorfne.
+     */
     @Override
     public final void actionPerformed(ActionEvent e) {
         if (!this.stopnutaHra) {
@@ -93,64 +134,71 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         if (this.stopnutaHra) this.gameLoop.stop();
     }
 
-    protected void nacitajSteny() {
+    // ── Zdieľaná logika ───────────────────────────────────────────────────
+
+    public void nacitajSteny() {
         this.steny.clear();
-        for (int r = 0; r < this.riadky; r++) {
-            for (int s = 0; s < this.stlpce; s++) {
+        for (int r = 0; r < RIADKY; r++) {
+            for (int s = 0; s < STLPCE; s++) {
                 if (this.mapa[r].charAt(s) == 'X') {
                     this.steny.add(new Stvorec(this.obrazokSteny,
-                            s * VELKOST_S, r * VELKOST_S,
-                            VELKOST_S, VELKOST_S));
+                            s * VELKOST_S, r * VELKOST_S, VELKOST_S, VELKOST_S));
                 }
             }
         }
     }
 
-    protected void pohybStriel() {
+    public void pohybStriel() {
         for (Strela s : this.strely) s.pohyb();
     }
 
     /**
-     * Kolízie striel so stenami (zdieľané) + s postavami (abstraktné).
+     * Kolízia striel so stenami (zdieľaná).
+     * Kolízia s postavami je abstraktná – každý mód rozhodne kto koho trafí.
      */
-    protected void skontrolujStenoveKolizie() {
+    public void skontrolujStenoveKolizie() {
         Iterator<Strela> it = this.strely.iterator();
         while (it.hasNext()) {
             Strela strela = it.next();
-
             boolean trafenaStena = false;
-            for (Stvorec stena : this.steny) {
+            for (HernyObjekt stena : this.steny) {
                 if (strela.koliduje(stena)) { trafenaStena = true; break; }
             }
             if (trafenaStena) { it.remove(); continue; }
-
             this.skontrolujPostaveKolizie(it, strela);
         }
     }
 
-    protected void pridajPickupy() {
+    /**
+     * Pickupy – volajú podtriedy (majú referencie na konkrétne postavy).
+     */
+    public void skontrolujPickupy() { /* override v podtriedach */ }
+
+    public void pridajPickupy() {
         this.pickupy.clear();
         int[][] pos = {{3, 5}, {15, 18}, {8, 12}, {12, 3}};
         for (int i = 0; i < pos.length; i++) {
+            int x = pos[i][0] * VELKOST_S;
+            int y = pos[i][1] * VELKOST_S;
             this.pickupy.add(i % 2 == 0
-                    ? new Heal(null,  pos[i][0] * VELKOST_S, pos[i][1] * VELKOST_S, VELKOST_S)
-                    : new Speed(null, pos[i][0] * VELKOST_S, pos[i][1] * VELKOST_S, VELKOST_S));
+                    ? new Heal(null, x, y, VELKOST_S)
+                    : new Speed(null, x, y, VELKOST_S));
         }
     }
 
-    // ── Zdieľané vykresľovanie ────────────────────────────────────────────
+    // ── Vykresľovanie ─────────────────────────────────────────────────────
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (Stvorec s : this.steny)     s.paint(g);
-        for (Zberatelny z : this.pickupy)
+        for (HernyObjekt s : this.steny)   s.paint(g);
+        for (Zberatelny  z : this.pickupy)
             if (z instanceof HernyObjekt) ((HernyObjekt) z).paint(g);
-        for (Strela s : this.strely)     s.paint(g);
+        for (Strela s : this.strely) s.paint(g);
         this.kresliHUD(g);
     }
 
-    // ── Zdieľaná klávesnica ───────────────────────────────────────────────
+    // ── Klávesnica ────────────────────────────────────────────────────────
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -166,49 +214,8 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         if (kod < 256) this.stlaceneKlavesy[kod] = false;
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
+    @Override public void keyTyped(KeyEvent e) {}
 
-    }
-
-    protected void keyPressedExtra(KeyEvent e) {
-
-    }
-
-    public ArrayList<Stvorec> getSteny() {
-        return this.steny;
-    }
-
-    public ArrayList<Strela> getStrely() {
-        return this.strely;
-    }
-
-    public ArrayList<Zberatelny> getPickupy() {
-        return this.pickupy;
-    }
-
-    public boolean[] getStlaceneKlavesy() {
-        return this.stlaceneKlavesy;
-    }
-
-    public boolean isStopnutaHra() {
-        return this.stopnutaHra;
-    }
-
-    public String[] getMapa() {
-        return this.mapa;
-    }
-
-    public Obtiaznost getObtiaznost() {
-        return this.obtiaznost;
-    }
-
-    public int getRiadky() {
-        return this.riadky;
-    }
-
-    public int getStlpce() {
-        return this.stlpce;
-    }
-
+    /** Podtriedy môžu pridať vlastné key handling (napr. streľba). */
+    public void keyPressedExtra(KeyEvent e) {}
 }

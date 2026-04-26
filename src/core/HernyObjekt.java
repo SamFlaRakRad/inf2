@@ -9,9 +9,6 @@ public abstract class HernyObjekt {
     private int vyska;
     private Image obrazok;
 
-    /**
-     * Konštruktor
-     */
     public HernyObjekt(Image obrazok, int x, int y, int sirka, int vyska) {
         this.obrazok = obrazok;
         this.x = x;
@@ -42,8 +39,8 @@ public abstract class HernyObjekt {
     public void setY(int y) {
         this.y = y;
     }
-    public void setObrazok(Image obrazok) {
-        this.obrazok = obrazok;
+    public void setObrazok(Image img) {
+        this.obrazok = img;
     }
 
     public abstract void pohyb();
@@ -51,16 +48,14 @@ public abstract class HernyObjekt {
     public abstract void paint(Graphics g);
 
     /**
-     * Axis-Aligned Bounding Box collision detection.
+     * AABB kolízia
      */
-    public boolean koliduje(HernyObjekt volaco) {
-        return this.x < volaco.x + volaco.sirka &&
-                this.x + this.sirka > volaco.x &&
-                this.y < volaco.y + volaco.vyska &&
-                this.y + this.vyska > volaco.y;
+    public boolean koliduje(HernyObjekt iny) {
+        return this.getX() < iny.getX() + iny.getSirka()
+                && this.getX() + this.getSirka() > iny.getX()
+                && this.getY() < iny.getY() + iny.getVyska()
+                && this.getY() + this.getVyska() > iny.getY();
     }
 
-    public boolean dotyk(HernyObjekt objekt) {
-        return this.koliduje(objekt);
-    }
+    public abstract boolean dotyk(HernyObjekt objekt);
 }

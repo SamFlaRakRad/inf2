@@ -10,19 +10,10 @@ public class Heal extends PowerUp {
         super(obrazok, x, y, velkost);
     }
 
-    /**
-     * OVERRIDE pouzi() - obnoví 1 HP.
-     * Berie Postava - funguje pre hráča aj bossa.
-     */
     @Override
     public void pouzi(Postava postava) {
         postava.setHP(postava.getHP() + 1);
         this.oznacZobrany();
-    }
-
-    @Override
-    public void pohyb() {
-
     }
 
     @Override

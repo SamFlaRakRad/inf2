@@ -34,9 +34,7 @@ public class Platno {
     private Obtiaznost obtaznost;
     private TypHry typ;
     private TypEnemaka typEnemaka;
-    /**
-     * Constructor for objects of class Platno
-     */
+
     
     public Platno(Obtiaznost obtaznost, TypHry typ, TypEnemaka typEnemaka) {
         this.obtaznost = obtaznost;
@@ -50,9 +48,24 @@ public class Platno {
         platno.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 
-        //RezimHry hra = new RezimHry(obtaznost.getVybrataObtaznost());
-        //platno.add(hra);
-        //hra.requestFocus();
+        RezimHry hra;
+        if (typ == TypHry.MULTIPLAYER) {
+            platno.setTitle("Multiplayer");
+            hra = new Multiplayer(obtaznost);
+
+        } else {
+            if (typEnemaka == TypEnemaka.BOT) {
+                platno.setTitle("Bot");
+                hra = new Singleplayer(obtaznost, TypEnemaka.BOT);
+
+            } else {
+                platno.setTitle("Boss");
+                hra = new Singleplayer(obtaznost, TypEnemaka.BOSS);
+            }
+        }
+
+        platno.add(hra);
+        hra.requestFocus();
         platno.pack();
         platno.setVisible(true);
         

@@ -13,30 +13,23 @@ import java.util.List;
  */
 public class Hrac extends HernyObjekt implements Postava {
     private char smerObr;
-    int pohybX = 0;
-    int pohybY = 0;
+    private int pohybX = 0;
+    private int pohybY = 0;
     private boolean vystrelenaStrela = false;
 
-    protected int x = 0;
-    protected int y = 0;
-    protected int sirka = 0;
-    protected int vyska = 0;
-    protected Image obrazok = null;
+    private int hp = 100;
+    private int rychlost = 8;
+    private int cooldown = 0;
 
-    protected int hp = 100;
-    protected int rychlost = 8;
-    protected int cooldown = 0;
+    private int strana;
 
     private final int klavesHore;
     private final int klavesDole;
     private final int klavesVlavo;
     private final int klavesVpravo;
     private final int klavesStrelba;
-    protected boolean[] stlaceneKlavesy;
+    private boolean[] stlaceneKlavesy;
 
-    /**
-     * Konštruktor triedy Hrac (starý formát)
-     */
     public Hrac(char pociatocnySmer, int hore, int dole, int vlavo, int vpravo, int strelba) {
         super(null, 0, 0, 32, 32);
         this.smerObr = pociatocnySmer;
@@ -46,13 +39,18 @@ public class Hrac extends HernyObjekt implements Postava {
         this.klavesVpravo = vpravo;
         this.klavesStrelba = strelba;
         this.stlaceneKlavesy = new boolean[256];
+        this.strana = 0;
     }
 
-    /**
-     * Konštruktor triedy Hrac (nový formát s pozíciou a klávesami)
-     */
     public Hrac(Image obrazok, int x, int y, int velkost, char smer,
-            int hore, int dole, int vlavo, int vpravo, int strelba, boolean[] stlaceneKlavesy) {
+                int hore, int dole, int vlavo, int vpravo,
+                int strelba, boolean[] stlaceneKlavesy) {
+        this(obrazok, x, y, velkost, smer, hore, dole, vlavo, vpravo, strelba, stlaceneKlavesy, 0);
+    }
+
+    public Hrac(Image obrazok, int x, int y, int velkost, char smer,
+                int hore, int dole, int vlavo, int vpravo,
+                int strelba, boolean[] stlaceneKlavesy, int strana) {
         super(obrazok, x, y, velkost, velkost);
         this.smerObr = smer;
         this.klavesHore = hore;
@@ -61,70 +59,69 @@ public class Hrac extends HernyObjekt implements Postava {
         this.klavesVpravo = vpravo;
         this.klavesStrelba = strelba;
         this.stlaceneKlavesy = stlaceneKlavesy;
+        this.strana = strana;
         this.hp = 100;
         this.rychlost = 8;
     }
 
-    /**
-     * metoda spracovania pohybu
-     */
-    public void spracujPohyb(boolean[] stlaceneKlavesy) {
-        this.pohybX = 0;
-        this.pohybY = 0;
-
-        if (stlaceneKlavesy[this.klavesHore]) {
-            this.pohybY = -this.rychlost;
-        }
-        if (stlaceneKlavesy[this.klavesDole]) {
-            this.pohybY = this.rychlost;
-        }
-        if (stlaceneKlavesy[this.klavesVlavo]) {
-            this.pohybX = -this.rychlost;
-            this.smerObr = 'L';
-        }
-        if (stlaceneKlavesy[this.klavesVpravo]) {
-            this.pohybX = this.rychlost;
-            this.smerObr = 'R';
-        }
-    }
-
-    /**
-     * Pohyb postery (nový formát)
-     */
     @Override
     public void pohybSa() {
         if (this.stlaceneKlavesy == null) return;
         this.pohybX = 0;
         this.pohybY = 0;
-
         if (this.stlaceneKlavesy[this.klavesHore]) {
             this.pohybY = -this.rychlost;
         }
         if (this.stlaceneKlavesy[this.klavesDole]) {
-            this.pohybY = this.rychlost;
+            this.pohybY =  this.rychlost;
         }
         if (this.stlaceneKlavesy[this.klavesVlavo]) {
             this.pohybX = -this.rychlost;
             this.smerObr = 'L';
         }
         if (this.stlaceneKlavesy[this.klavesVpravo]) {
-            this.pohybX = this.rychlost;
+            this.pohybX =  this.rychlost;
             this.smerObr = 'R';
         }
-
-        if (this.cooldown > 0) this.cooldown--;
+        if (this.cooldown > 0) {
+            this.cooldown--;
+        }
     }
 
-    /**
-     * metoda ktorá oznamuje že hrac vystrelil strelu
-     */
+    public void spracujPohyb(boolean[] keys) {
+        this.stlaceneKlavesy = keys;
+        this.pohybSa();
+    }
+
     @Override
     public void vystrel() {
         this.vystrelenaStrela = true;
     }
 
     @Override
-    public int getHP() {
+    public void utoc(int cielX, int cielY, List<Strela> strely) {
+        if (!this.mozeUtocit() || !this.vystrelenaStrela) return;
+        double rx = (this.smerObr == 'L') ? -10.0 : 10.0;
+        strely.add(new Strela(
+                this.getX() + this.getSirka() / 2,
+                this.getY() + this.getVyska() / 2,
+                rx, 0, this.strana, Strela.TypStrely.NORMALNA));
+        this.resetVystrelena();
+        this.cooldown = 15;
+    }
+
+    @Override
+    public boolean mozeUtocit()   {
+        return this.cooldown <= 0;
+    }
+
+    @Override
+    public void resetCooldown() {
+        this.cooldown = 0;
+    }
+
+    @Override
+    public int  getHP() {
         return this.hp;
     }
 
@@ -135,24 +132,17 @@ public class Hrac extends HernyObjekt implements Postava {
 
     @Override
     public void setHP(int hp) {
-        this.hp = Math.min(hp, 100);
+        this.hp = Math.clamp(hp, 0, 100);
     }
 
     @Override
-    public void resetCooldown() {
-
+    public void dostanZasah(int p) {
+        this.hp = Math.max(0, this.hp - p);
     }
 
     @Override
-    public void dostaZasah(int poskodenie) {
-        this.hp -= poskodenie;
-        if (this.hp < 0) this.hp = 0;
-    }
-
-    @Override
-    public void dostanZasah(int poskodenie) {
-        this.hp -= poskodenie;
-        if (this.hp < 0) this.hp = 0;
+    public void dostaZasah(int p) {
+        this.dostanZasah(p);
     }
 
     @Override
@@ -161,100 +151,70 @@ public class Hrac extends HernyObjekt implements Postava {
     }
 
     @Override
-    public void utoc(int cielX, int cielY, List<Strela> strely) {
-        if (!this.mozeUtocit() || !this.getVystrelena()) return;
-        double dx = cielX - this.x;
-        double dy = cielY - this.y;
-        double d = Math.sqrt(dx * dx + dy * dy);
-        if (d == 0) return;
-        double rx = (dx / d) * 8;
-        double ry = (dy / d) * 8;
-        strely.add(new Strela(this.x + this.sirka / 2, this.y + this.sirka / 2,
-                rx, ry, 0, Strela.TypStrely.NORMALNA));
-        this.resetVystrelena();
-        this.cooldown = 15;
-    }
-
-    @Override
-    public boolean mozeUtocit() {
-        return this.cooldown <= 0;
-    }
-
-    @Override
     public int dealDmg() {
-        return 1;
+        return 25;
+    }
+    @Override public int getRychlost() {
+        return this.rychlost;
     }
 
     @Override
-    public int getX() {
-        return this.x;
-    }
-
-    @Override
-    public int getY() {
-        return this.y;
-    }
-
-    /**
-     * metoda ktorá po vystreleni vráti povodny nevystrelený stav hráčovy 
-     */
-    public void resetVystrelena() {
-        this.vystrelenaStrela = false;
-    }
-
-    /**
-     * geter pre pohyb x-ovej osi
-     */
     public int getPohybX() {
         return this.pohybX;
     }
-
-    /**
-     * geter pre pohyb y-ovej osi
-     */
+    @Override
     public int getPohybY() {
         return this.pohybY;
     }
 
-    /**
-     * seter pre pohyb x-ovej osi
-     */
     @Override
-    public void setX(int x) {
-        this.x = x;
+    public int getX() {
+        return super.getX();
     }
 
-    /**
-     * seter pre pohyb y-ovej osi
-     */
     @Override
-    public void setY(int y) {
-        this.y = y;
+    public int getY() {
+        return super.getY();
     }
 
-    /**
-     * getter pre zaciatocny smer hracov
-     */
-    public char getSmerObr() {
-        return this.smerObr;
+    public void  resetVystrelena() {
+        this.vystrelenaStrela = false;
     }
 
-    /**
-     * getter pre stav hraca 
-     */
     public boolean getVystrelena() {
         return this.vystrelenaStrela;
     }
 
-    /**
-     * setter pre zaciatocny smer hracov
-     */
-    public void setSmerObr(char smer) {
-        this.smerObr = smer;
+    public char getSmerObr() {
+        return this.smerObr;
     }
 
-    public void setObrazok(Image img) {
-        this.obrazok = img;
+    public void setSmerObr(char s) {
+        this.smerObr = s;
+    }
+
+    public int getStrana() {
+        return this.strana;
+    }
+
+    public void setRychlost(int r) {
+        this.rychlost = r;
+    }
+
+
+    public void setPohybX(int v) {
+        this.pohybX = v;
+    }
+    public void setPohybY(int v) {
+        this.pohybY = v;
+    }
+    public void setCooldown(int v) {
+        this.cooldown = v;
+    }
+    public void decrementCooldown() {
+        if (this.cooldown > 0) {
+            this.cooldown--;
+        }
     }
 
     @Override
@@ -262,27 +222,17 @@ public class Hrac extends HernyObjekt implements Postava {
 
     }
 
-    public Image getObrazok() {
-        return this.obrazok;
-    }
-
-    public int getRychlost() {
-        return this.rychlost;
-    }
-
-    public void setRychlost(int rych) {
-        this.rychlost = rych;
-    }
-
     @Override
     public void paint(Graphics g) {
-        if (this.obrazok != null) {
-            g.drawImage(this.obrazok, this.x, this.y, this.sirka, this.vyska, null);
+        Image img = this.getObrazok();
+        if (img != null) {
+            g.drawImage(img, this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
+        } else {
+            g.setColor(this.strana == 0 ? new Color(30, 100, 200) : new Color(200, 50, 30));
+            g.fillRect(this.getX(), this.getY(), this.getSirka(), this.getVyska());
         }
     }
 
     @Override
-    public boolean dotyk(HernyObjekt objekt) {
-        return this.koliduje(objekt);
-    }
+    public boolean dotyk(HernyObjekt o) { return this.koliduje(o); }
 }

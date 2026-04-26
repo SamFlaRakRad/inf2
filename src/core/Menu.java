@@ -18,12 +18,7 @@ import java.awt.event.ActionEvent;
 public class Menu extends JFrame {
     private Obtiaznost vybrata;
     private TypHry typ;
-
-
-
-
     private TypEnemaka enemak;
-
 
     /**
      * Konštruktor triedy Menu
@@ -162,9 +157,7 @@ public class Menu extends JFrame {
         this.setVisible(true);
 
     }
-    /**
-     * Metóda ktorá sa zavolá po výbere obtiažnosti a vytvorý plátno s touto obtiažnosťou 
-     */
+
     private void vyberObtaznost(Obtiaznost obtaznost, TypHry typ, TypEnemaka typEnemaka) {
         this.vybrata = obtaznost;
         this.typ = typ;
@@ -172,10 +165,7 @@ public class Menu extends JFrame {
         this.dispose();
         new Platno(this.vybrata, this.typ, this.enemak);
     }
-    
-    /**
-     * getter pre vybranú obtiažnosť 
-     */
+
     public Obtiaznost getVybrataObtaznost() {
         return this.vybrata;
     }
