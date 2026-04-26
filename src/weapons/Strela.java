@@ -4,12 +4,6 @@ import core.HernyObjekt;
 import java.awt.Graphics;
 import java.awt.Color;
 
-/**
- * Vytvorenie striel ktorými sa budú hráči strielať.
- * 
- * @author (Samuel Ďuriš) 
- * @version (V3)
- */
 public class Strela extends HernyObjekt {
     private int x;
     private int y;
@@ -26,16 +20,11 @@ public class Strela extends HernyObjekt {
     private int cielX = 0;
     private int cielY = 0;
 
-    /**
-     * Konštruktor
-     */
     public Strela() {
         super(null, 0, 0, VELKOST_STRELY, VELKOST_STRELY);
     }
 
-    /**
-     * Konštruktor s pozíciou a rýchlosťou
-     */
+
     public Strela(int x, int y, double rx, double ry, int strana, TypStrely typ) {
         super(null, x, y, VELKOST_STRELY, VELKOST_STRELY);
         this.x = x;
@@ -46,71 +35,47 @@ public class Strela extends HernyObjekt {
         this.typ = typ;
     }
 
-    /**
-     * Getter pre x pre metoduDotykStrely v triede hra
-     */
+
     @Override
     public int getX() {
         return this.x;
     }
 
-    /**
-     * Getter pre y pre metoduDotykStrely v triede hra
-     */
     @Override
     public int getY() {
         return this.y;
     }
 
-    /**
-     * Setter pre x pozíciu
-     */
     @Override
     public void setX(int x) {
         this.x = x;
     }
 
-    /**
-     * Setter pre y pozíciu
-     */
     @Override
     public void setY(int y) {
         this.y = y;
     }
 
-    /**
-     * Setter pre rychlosť strely osi X
-     */
     public void setRychlostX(int rychlost) {
         this.rychlostX = rychlost;
     }
 
-    /**
-     * Setter pre rychlosť strely osi Y
-     */
     public void setRychlostY(int rychlost) {
         this.rychlostY = rychlost;
     }
 
-    /**
-     * Getter pre rozmery strely
-     */
+
     public int getStranaStrely() {
         return this.VELKOST_STRELY;
     }
 
-    /**
-     * setovanie novej x-ovej pozície strely
-     */
+
     @Override
     public void pohyb() {
         this.x += (int) this.rychlostX;
         this.y += (int) this.rychlostY;
     }
 
-    /**
-     * vykreslovanie kruhu na danej pozícii
-     */
     @Override
     public void paint(Graphics g) {
         g.setColor(Color.BLACK);

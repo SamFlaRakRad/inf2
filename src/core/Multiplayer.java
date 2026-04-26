@@ -171,7 +171,6 @@ public class Multiplayer extends RezimHry {
 
     }
 
-    /** Obaja hráči môžu strieľať – SPACE (P1) a ENTER (P2). */
     @Override
     public void keyPressedExtra(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE && this.hrac1 != null) this.hrac1.vystrel();
@@ -193,8 +192,6 @@ public class Multiplayer extends RezimHry {
         this.setStopnutaHra(false);
         this.startGameLoop();
     }
-
-    // ── Pomocná metóda ────────────────────────────────────────────────────
 
     private void aplikujPohybSKolizou(Hrac h) {
         int nx = h.getX() + h.getPohybX();

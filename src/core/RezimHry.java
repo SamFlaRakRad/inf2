@@ -5,7 +5,6 @@ import powerUps.Zberatelny;
 import powerUps.Heal;
 import powerUps.Speed;
 
-//...existing imports...
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.awt.Graphics;
@@ -40,8 +39,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     private Obtiaznost obtiaznost;
     private Timer      gameLoop;
     private Image      obrazokSteny;
-
-    // ── Konštruktor ───────────────────────────────────────────────────────
 
     public RezimHry(Obtiaznost obtiaznost) {
         this.obtiaznost  = obtiaznost;
@@ -104,8 +101,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     public void startGameLoop()             { this.gameLoop.start(); }
     public void stopGameLoop()              { this.gameLoop.stop(); }
 
-    // ── Abstraktné metódy ─────────────────────────────────────────────────
-
     public abstract void nacitajPostavy();
     public abstract void pohybPostavami();
     public abstract void spracujUtok();
@@ -114,12 +109,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     public abstract void skontrolujKoniec();
     public abstract void restart();
 
-    // ── Herný cyklus ─────────────────────────────────────────────────────
-
-    /**
-     * actionPerformed – rovnaký pre oba módy.
-     * Abstraktné metódy sú volané polymorfne.
-     */
     @Override
     public final void actionPerformed(ActionEvent e) {
         if (!this.stopnutaHra) {
@@ -133,8 +122,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         this.repaint();
         if (this.stopnutaHra) this.gameLoop.stop();
     }
-
-    // ── Zdieľaná logika ───────────────────────────────────────────────────
 
     public void nacitajSteny() {
         this.steny.clear();
@@ -152,10 +139,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         for (Strela s : this.strely) s.pohyb();
     }
 
-    /**
-     * Kolízia striel so stenami (zdieľaná).
-     * Kolízia s postavami je abstraktná – každý mód rozhodne kto koho trafí.
-     */
     public void skontrolujStenoveKolizie() {
         Iterator<Strela> it = this.strely.iterator();
         while (it.hasNext()) {
@@ -169,9 +152,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         }
     }
 
-    /**
-     * Pickupy – volajú podtriedy (majú referencie na konkrétne postavy).
-     */
     public void skontrolujPickupy() { /* override v podtriedach */ }
 
     public void pridajPickupy() {
@@ -186,8 +166,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         }
     }
 
-    // ── Vykresľovanie ─────────────────────────────────────────────────────
-
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -197,8 +175,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         for (Strela s : this.strely) s.paint(g);
         this.kresliHUD(g);
     }
-
-    // ── Klávesnica ────────────────────────────────────────────────────────
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -214,8 +190,11 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         if (kod < 256) this.stlaceneKlavesy[kod] = false;
     }
 
-    @Override public void keyTyped(KeyEvent e) {}
+    @Override public void keyTyped(KeyEvent e) {
 
-    /** Podtriedy môžu pridať vlastné key handling (napr. streľba). */
-    public void keyPressedExtra(KeyEvent e) {}
+    }
+
+    public void keyPressedExtra(KeyEvent e) {
+
+    }
 }
