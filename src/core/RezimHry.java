@@ -184,7 +184,7 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
             int y = pos[i][1] * VELKOST_S;
             this.pickupy.add(i % 2 == 0
                     ? new Heal(null, x, y, VELKOST_S)
-                    : new Speed(null, x, y, VELKOST_S));
+                    : new Speed(null, x, y, VELKOST_S, 5));
         }
     }
 

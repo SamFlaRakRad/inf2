@@ -3,12 +3,14 @@ package players;
 import core.HernyObjekt;
 import weapons.Strela;
 
+import javax.swing.ImageIcon;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.util.List;
 
 public class Bot extends Hrac implements Postava {
     private HernyObjekt ciel;
+    private ImageIcon ikonka;
 
     public Bot(Image obrazok, int x, int y, int velkost, boolean[] stlaceneKlavesy) {
         super(obrazok, x, y, velkost, 'L', -1, -1, -1, -1, -1, stlaceneKlavesy, 1);
@@ -16,6 +18,17 @@ public class Bot extends Hrac implements Postava {
 
     public void sledujCiel(HernyObjekt ciel) {
         this.ciel = ciel;
+    }
+
+    public ImageIcon getIkonka() {
+        return this.ikonka;
+    }
+
+    public void setIkonka(ImageIcon ikonka) {
+        this.ikonka = ikonka;
+        if (ikonka != null) {
+            this.setObrazok(ikonka.getImage());
+        }
     }
 
     @Override
@@ -38,7 +51,6 @@ public class Bot extends Hrac implements Postava {
 
         this.decrementCooldown();
 
-        // Bot strieľa keď je blízko hráča
         if (Math.abs(dx) < 200 && Math.abs(dy) < 200) {
             this.vystrel();
         }

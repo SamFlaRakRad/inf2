@@ -3,6 +3,7 @@ package players;
 import core.HernyObjekt;
 import weapons.Strela;
 
+import javax.swing.*;
 import java.awt.Graphics;
 import java.awt.Image;
 

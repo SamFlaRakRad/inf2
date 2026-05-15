@@ -2,6 +2,7 @@ package core;
 
 import players.Hrac;
 import powerUps.Heal;
+import powerUps.Speed;
 import powerUps.Zberatelny;
 import weapons.Strela;
 
@@ -34,6 +35,8 @@ public class Multiplayer extends RezimHry {
     private Image hrac1Vlavo;
     private Image hrac2Vpravo;
     private Image hrac2Vlavo;
+    private Image healObr;
+    private Image speedObr;
 
     // Náboje zo mapy
     private ArrayList<Stvorec> nabojeNaMape;
@@ -42,19 +45,31 @@ public class Multiplayer extends RezimHry {
     private boolean remiza   = false;
     private boolean vyhralH1 = false;
     private boolean vyhralH2 = false;
+    private int pocetPickupov;
+    private int speedBoostTrvanie;
+
 
     public Multiplayer(Obtiaznost obtiaznost) {
         super(obtiaznost);
         switch (obtiaznost) {
             case LAHKA:
                 this.zacinajuceNaboje = 20;
+                this.pocetPickupov = 4;
+                this.speedBoostTrvanie = 300;
                 break;
+
             case STREDNA:
                 this.zacinajuceNaboje = 10;
+                this.pocetPickupov = 2;
+                this.speedBoostTrvanie = 150;
                 break;
+
             case TAZKA:
                 this.zacinajuceNaboje =  5;
+                this.pocetPickupov = 1;
+                this.speedBoostTrvanie =  75;
                 break;
+
             default:
                 this.zacinajuceNaboje = 100;
         }
@@ -70,11 +85,13 @@ public class Multiplayer extends RezimHry {
         this.hraci = new ArrayList<>();
         this.nabojeNaMape = new ArrayList<>();
 
-        this.nabojObr    = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/naboje.png"))).getImage();
+        this.nabojObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/naboje.png"))).getImage();
         this.hrac1Vpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vpravo.png"))).getImage();
-        this.hrac1Vlavo  = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vlavo.png"))).getImage();
+        this.hrac1Vlavo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vlavo.png"))).getImage();
         this.hrac2Vpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac2Vpravo.png"))).getImage();
-        this.hrac2Vlavo  = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac2Vlavo.png"))).getImage();
+        this.hrac2Vlavo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac2Vlavo.png"))).getImage();
+        this.healObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/heal.png"))).getImage();
+        this.speedObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/speed.png"))).getImage();
 
         for (int r = 0; r < super.getRIADKY(); r++) {
             for (int s = 0; s < super.getSTLPCE(); s++) {
@@ -117,17 +134,33 @@ public class Multiplayer extends RezimHry {
 
     @Override
     public void pridajPickupy() {
+        this.getPickupy().clear();
+        if (this.pocetPickupov <= 0) {
+            return;
+        }
         Random rand = new Random();
-        int x;
-        int y;
-        do {
-            x = rand.nextInt(20);
-            y = rand.nextInt(25);
-        } while (this.getMapa()[x].charAt(y) != '.');
+        int umiestnene = 0;
+        int maxPokusov = 500;
+        int pokus = 0;
 
-        this.getPickupy().add(new Heal(
-                new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/heal.png"))).getImage(),
-                y * super.getVelkostS(), x * super.getVelkostS(), super.getVelkostS()));
+        while (umiestnene < this.pocetPickupov && pokus < maxPokusov) {
+            pokus++;
+            int row = rand.nextInt(super.getRIADKY());
+            int col = rand.nextInt(super.getSTLPCE());
+            if (this.getMapa()[row].charAt(col) != '.') {
+                continue;
+            }
+            int px = col * super.getVelkostS();
+            int py = row * super.getVelkostS();
+
+            if (umiestnene % 2 == 0) {
+                this.getPickupy().add(new Heal(this.healObr, px, py, super.getVelkostS()));
+            } else {
+                this.getPickupy().add(new Speed(this.speedObr, px, py,
+                        super.getVelkostS(), this.speedBoostTrvanie));
+            }
+            umiestnene++;
+        }
     }
 
     @Override
@@ -249,8 +282,8 @@ public class Multiplayer extends RezimHry {
                       :                 "Hráč 2 vyhral!";
             g.setFont(new Font("Arial", Font.BOLD, 36));
             FontMetrics fm = g.getFontMetrics();
-            int x = (getWidth()  - fm.stringWidth(msg)) / 2;
-            int y = (getHeight() + fm.getAscent())       / 2;
+            int x = (this.getWidth()  - fm.stringWidth(msg)) / 2;
+            int y = (this.getHeight() + fm.getAscent())       / 2;
             g.setColor(Color.RED);
             g.drawString(msg, x, y);
             g.setFont(new Font("Arial", Font.PLAIN, 16));

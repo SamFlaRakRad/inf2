@@ -16,6 +16,9 @@ public class Hrac extends HernyObjekt implements Postava {
     private char smerObr;
     private int pohybX = 0;
     private int pohybY = 0;
+    private static final int RYCHLOST_ZAKLADNA = 8;
+    private static final int RYCHLOST_BOOST    = 5;
+    private int speedBoostTiky = 0;
     private boolean vystrelenaStrela = false;
 
     private int hp = 100;
@@ -97,6 +100,11 @@ public class Hrac extends HernyObjekt implements Postava {
                                 speedX, 0, this.strana, Strela.TypStrely.NORMALNA));
         this.resetVystrelena();
         this.cooldown = 15;
+    }
+
+    public void activateSpeedBoost(int tiky) {
+        this.rychlost = RYCHLOST_ZAKLADNA + RYCHLOST_BOOST;
+        this.speedBoostTiky = tiky;
     }
 
     @Override
