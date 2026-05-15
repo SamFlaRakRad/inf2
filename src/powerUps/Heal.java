@@ -1,9 +1,9 @@
 package powerUps;
 
-import core.HernyObjekt;
 import players.Postava;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
 
 public class Heal extends PowerUp {
     public Heal(Image obrazok, int x, int y, int velkost) {
@@ -18,6 +18,8 @@ public class Heal extends PowerUp {
 
     @Override
     public void paint(Graphics g) {
-        if (this.getObrazok() != null) g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
+        if (this.getObrazok() != null) {
+            g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
+        }
     }
 }

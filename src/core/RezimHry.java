@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
+import java.util.Objects;
 
 /**
 
@@ -24,12 +25,12 @@ import java.awt.event.KeyEvent;
  */
 public abstract class RezimHry extends JPanel implements ActionListener, KeyListener {
 
-    private final int RIADKY    = 20;
-    private final int STLPCE    = 25;
-    private final int VELKOST_S = 32;
+    private static final int RIADKY = 20;
+    private static final int STLPCE = 25;
+    private static final int VELKOST_S = 32;
 
-    private ArrayList<Stvorec>   steny;
-    private ArrayList<Strela>    strely;
+    private ArrayList<Stvorec> steny;
+    private ArrayList<Strela> strely;
     private ArrayList<Zberatelny> pickupy;
 
     private boolean[] stlaceneKlavesy = new boolean[256];
@@ -49,7 +50,7 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         this.addKeyListener(this);
         this.setFocusable(true);
 
-        this.obrazokSteny = new ImageIcon(getClass().getResource("/images/stena.png")).getImage();
+        this.obrazokSteny = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/stena.png"))).getImage();
 
         Generator gen = new Generator();
         this.mapa = gen.vytvorMapu(obtiaznost);
@@ -92,14 +93,21 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         return this.STLPCE;
     }
 
-    public int getVELKOST_S() {
+    public int getVelkostS() {
         return this.VELKOST_S;
     }
 
-    public void setStopnutaHra(boolean v)   { this.stopnutaHra = v; }
-    public void setMapa(String[] m)         { this.mapa = m; }
-    public void startGameLoop()             { this.gameLoop.start(); }
-    public void stopGameLoop()              { this.gameLoop.stop(); }
+    public void setStopnutaHra(boolean v) {
+        this.stopnutaHra = v; }
+    public void setMapa(String[] m) {
+        this.mapa = m;
+    }
+    public void startGameLoop() {
+        this.gameLoop.start();
+    }
+    public void stopGameLoop() {
+        this.gameLoop.stop();
+    }
 
     public abstract void nacitajPostavy();
     public abstract void pohybPostavami();
@@ -108,6 +116,10 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     public abstract void kresliHUD(Graphics g);
     public abstract void skontrolujKoniec();
     public abstract void restart();
+
+    public abstract void kresliPostavy(Graphics g);
+
+
 
     @Override
     public final void actionPerformed(ActionEvent e) {
@@ -120,7 +132,9 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
             this.skontrolujPickupy();
         }
         this.repaint();
-        if (this.stopnutaHra) this.gameLoop.stop();
+        if (this.stopnutaHra) {
+            this.gameLoop.stop();
+        }
     }
 
     public void nacitajSteny() {
@@ -136,7 +150,9 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     }
 
     public void pohybStriel() {
-        for (Strela s : this.strely) s.pohyb();
+        for (Strela s : this.strely) {
+            s.pohyb();
+        }
     }
 
     public void skontrolujStenoveKolizie() {
@@ -145,9 +161,15 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
             Strela strela = it.next();
             boolean trafenaStena = false;
             for (HernyObjekt stena : this.steny) {
-                if (strela.koliduje(stena)) { trafenaStena = true; break; }
+                if (strela.koliduje(stena)) {
+                    trafenaStena = true;
+                    break;
+                }
             }
-            if (trafenaStena) { it.remove(); continue; }
+            if (trafenaStena) {
+                it.remove();
+                continue;
+            }
             this.skontrolujPostaveKolizie(it, strela);
         }
     }
@@ -169,25 +191,39 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        for (HernyObjekt s : this.steny)   s.paint(g);
-        for (Zberatelny  z : this.pickupy)
-            if (z instanceof HernyObjekt) ((HernyObjekt) z).paint(g);
-        for (Strela s : this.strely) s.paint(g);
+        for (HernyObjekt s : this.steny) {
+            s.paint(g);
+        }
+        for (Zberatelny  z : this.pickupy) {
+            if (z instanceof HernyObjekt) {
+                ((HernyObjekt)z).paint(g);
+            }
+        }
+        for (Strela s : this.strely) {
+            s.paint(g);
+        }
         this.kresliHUD(g);
+        this.kresliPostavy(g);
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         int kod = e.getKeyCode();
-        if (kod < 256) this.stlaceneKlavesy[kod] = true;
-        if (this.stopnutaHra && kod == KeyEvent.VK_ESCAPE) this.restart();
+        if (kod < 256) {
+            this.stlaceneKlavesy[kod] = true;
+        }
+        if (this.stopnutaHra && kod == KeyEvent.VK_ESCAPE) {
+            this.restart();
+        }
         this.keyPressedExtra(e);
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         int kod = e.getKeyCode();
-        if (kod < 256) this.stlaceneKlavesy[kod] = false;
+        if (kod < 256) {
+            this.stlaceneKlavesy[kod] = false;
+        }
     }
 
     @Override public void keyTyped(KeyEvent e) {

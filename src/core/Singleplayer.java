@@ -7,18 +7,21 @@ import players.Postava;
 import powerUps.Zberatelny;
 import weapons.Strela;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
+import java.util.Objects;
 
 public class Singleplayer extends RezimHry {
     private Hrac hrac;
     private Postava protivnik;
     private boolean jeBoss;
 
+    private int zacinajuceNaboje;
     private int zasobnikHraca;
-    private static final int ZASOBNIK_MAX = 30;
+
 
     private Image hrac1Vpravo;
     private Image hrac1Vlavo;
@@ -28,32 +31,47 @@ public class Singleplayer extends RezimHry {
 
     public Singleplayer(Obtiaznost obtiaznost, TypEnemaka typEnemaka) {
         super(obtiaznost);
-        this.jeBoss        = (typEnemaka == TypEnemaka.BOSS);
-        this.zasobnikHraca = ZASOBNIK_MAX;
+        switch (obtiaznost) {
+            case LAHKA:
+                this.zacinajuceNaboje = 20;
+                break;
+            case STREDNA:
+                this.zacinajuceNaboje = 10;
+                break;
+            case TAZKA:
+                this.zacinajuceNaboje =  5;
+                break;
+            default:
+                this.zacinajuceNaboje = 100;
+        }
+        this.jeBoss = (typEnemaka == TypEnemaka.BOSS);
+        this.zasobnikHraca = this.zacinajuceNaboje;
+        this.nacitajPostavy();
     }
 
     @Override
     public void nacitajPostavy() {
-        this.hrac1Vpravo = new ImageIcon(getClass().getResource("/images/hrac1Vpravo.png")).getImage();
-        this.hrac1Vlavo  = new ImageIcon(getClass().getResource("/images/hrac1Vlavo.png")).getImage();
-        Image hrac2Img   = new ImageIcon(getClass().getResource("/images/hrac2Vlavo.png")).getImage();
+        this.hrac1Vpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vpravo.png"))).getImage();
+        this.hrac1Vlavo  = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vlavo.png"))).getImage();
+        Image hrac2Img   = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac2Vlavo.png"))).getImage();
 
         for (int r = 0; r < super.getRIADKY(); r++) {
             for (int s = 0; s < super.getSTLPCE(); s++) {
                 char ch = this.getMapa()[r].charAt(s);
-                int x = s * super.getVELKOST_S(), y = r * super.getVELKOST_S();
+                int x = s * super.getVelkostS();
+                int y = r * super.getVelkostS();
 
                 if (ch == 'H') {
-                    this.hrac = new Hrac(this.hrac1Vpravo, x, y, super.getVELKOST_S(), 'R',
+                    this.hrac = new Hrac(this.hrac1Vpravo, x, y, super.getVelkostS(), 'R',
                             KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D,
                             KeyEvent.VK_SPACE, this.getStlaceneKlavesy(), 0);
                 }
 
                 if (ch == 'P') {
                     if (this.jeBoss) {
-                        this.protivnik = new Boss(null, x, y, super.getVELKOST_S() * 2);
+                        this.protivnik = new Boss(null, x, y, super.getVelkostS() * 2);
                     } else {
-                        Bot bot = new Bot(hrac2Img, x, y, super.getVELKOST_S(), this.getStlaceneKlavesy());
+                        Bot bot = new Bot(hrac2Img, x, y, super.getVelkostS(), this.getStlaceneKlavesy());
                         this.protivnik = bot;
                     }
                 }
@@ -62,16 +80,18 @@ public class Singleplayer extends RezimHry {
 
         if (this.hrac != null && this.protivnik != null) {
             if (this.protivnik instanceof Boss) {
-                ((Boss) this.protivnik).setCiel(this.hrac);
+                ((Boss)this.protivnik).setCiel(this.hrac);
             } else if (this.protivnik instanceof Bot) {
-                ((Bot) this.protivnik).sledujCiel(this.hrac);
+                ((Bot)this.protivnik).sledujCiel(this.hrac);
             }
         }
     }
 
     @Override
     public void pohybPostavami() {
-        if (this.hrac == null || this.protivnik == null) return;
+        if (this.hrac == null || this.protivnik == null) {
+            return;
+        }
 
         // Hráč
         this.hrac.pohybSa();
@@ -80,24 +100,29 @@ public class Singleplayer extends RezimHry {
 
         // enemy
         this.protivnik.pohybSa();
-        this.aplikujPohybSKolizou((HernyObjekt) this.protivnik,
+        this.aplikujPohybSKolizou((HernyObjekt)this.protivnik,
                 this.protivnik.getPohybX(), this.protivnik.getPohybY());
 
         for (Strela s : this.getStrely()) {
-            if (s.getTyp() == Strela.TypStrely.RAKETA)
+            if (s.getTyp() == Strela.TypStrely.RAKETA) {
                 s.aktualizujCiel(this.hrac.getX(), this.hrac.getY());
+            }
         }
     }
 
     @Override
     public void spracujUtok() {
-        if (this.hrac == null || this.protivnik == null) return;
+        if (this.hrac == null || this.protivnik == null) {
+            return;
+        }
 
         // Hráč
         if (this.hrac.getVystrelena() && this.zasobnikHraca > 0) {
             int pred = this.getStrely().size();
             this.hrac.utoc(this.protivnik.getX(), this.protivnik.getY(), this.getStrely());
-            if (this.getStrely().size() > pred) this.zasobnikHraca--;
+            if (this.getStrely().size() > pred) {
+                this.zasobnikHraca--;
+            }
         }
 
         // enemy
@@ -108,7 +133,7 @@ public class Singleplayer extends RezimHry {
 
     @Override
     public void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela) {
-        HernyObjekt protObj = (HernyObjekt) this.protivnik;
+        HernyObjekt protObj = (HernyObjekt)this.protivnik;
         if (strela.getStrana() == 0 && strela.koliduje(protObj)) {
             this.protivnik.dostaZasah(1);   // polymorfné – Boss mení fázu
             it.remove();
@@ -137,18 +162,22 @@ public class Singleplayer extends RezimHry {
 
     @Override
     public void skontrolujPickupy() {
-        if (this.hrac == null) return;
+        if (this.hrac == null) {
+            return;
+        }
         for (Zberatelny z : this.getPickupy()) {
-            if (!z.jeZobrany() && this.hrac.koliduje((HernyObjekt) z))
+            if (!z.jeZobrany() && this.hrac.koliduje((HernyObjekt)z)) {
                 z.pouzi(this.hrac);
+            }
         }
         this.getPickupy().removeIf(Zberatelny::jeZobrany);
     }
 
     @Override
     public void keyPressedExtra(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SPACE && this.hrac != null)
+        if (e.getKeyCode() == KeyEvent.VK_SPACE && this.hrac != null) {
             this.hrac.vystrel();
+        }
     }
 
     @Override
@@ -159,11 +188,16 @@ public class Singleplayer extends RezimHry {
         this.getStrely().clear();
         this.nacitajPostavy();
         this.pridajPickupy();
-        this.zasobnikHraca    = ZASOBNIK_MAX;
-        this.hracVyhral       = false;
-        this.protivnikVyhral  = false;
+        this.zasobnikHraca = this.zacinajuceNaboje;
+        this.hracVyhral = false;
+        this.protivnikVyhral = false;
         this.setStopnutaHra(false);
         this.startGameLoop();
+    }
+
+    @Override
+    public void kresliPostavy(Graphics g) {
+
     }
 
     private void aplikujPohybSKolizou(HernyObjekt obj, int dx, int dy) {

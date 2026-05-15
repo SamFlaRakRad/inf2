@@ -66,14 +66,14 @@ public class Strela extends HernyObjekt {
 
 
     public int getStranaStrely() {
-        return this.VELKOST_STRELY;
+        return VELKOST_STRELY;
     }
 
 
     @Override
     public void pohyb() {
-        this.x += (int) this.rychlostX;
-        this.y += (int) this.rychlostY;
+        this.x += (int)this.rychlostX;
+        this.y += (int)this.rychlostY;
     }
 
     @Override

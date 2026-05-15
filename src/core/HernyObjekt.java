@@ -1,6 +1,7 @@
 package core;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
 
 public abstract class HernyObjekt {
     private int x;

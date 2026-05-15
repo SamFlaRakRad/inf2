@@ -2,7 +2,8 @@ package players;
 
 import weapons.Strela;
 import core.HernyObjekt;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.util.List;
 
 /**
@@ -30,24 +31,6 @@ public class Hrac extends HernyObjekt implements Postava {
     private final int klavesStrelba;
     private boolean[] stlaceneKlavesy;
 
-    public Hrac(char pociatocnySmer, int hore, int dole, int vlavo, int vpravo, int strelba) {
-        super(null, 0, 0, 32, 32);
-        this.smerObr = pociatocnySmer;
-        this.klavesHore = hore;
-        this.klavesDole = dole;
-        this.klavesVlavo = vlavo;
-        this.klavesVpravo = vpravo;
-        this.klavesStrelba = strelba;
-        this.stlaceneKlavesy = new boolean[256];
-        this.strana = 0;
-    }
-
-    public Hrac(Image obrazok, int x, int y, int velkost, char smer,
-                int hore, int dole, int vlavo, int vpravo,
-                int strelba, boolean[] stlaceneKlavesy) {
-        this(obrazok, x, y, velkost, smer, hore, dole, vlavo, vpravo, strelba, stlaceneKlavesy, 0);
-    }
-
     public Hrac(Image obrazok, int x, int y, int velkost, char smer,
                 int hore, int dole, int vlavo, int vpravo,
                 int strelba, boolean[] stlaceneKlavesy, int strana) {
@@ -60,13 +43,13 @@ public class Hrac extends HernyObjekt implements Postava {
         this.klavesStrelba = strelba;
         this.stlaceneKlavesy = stlaceneKlavesy;
         this.strana = strana;
-        this.hp = 100;
-        this.rychlost = 8;
     }
 
     @Override
     public void pohybSa() {
-        if (this.stlaceneKlavesy == null) return;
+        if (this.stlaceneKlavesy == null) {
+            return;
+        }
         this.pohybX = 0;
         this.pohybY = 0;
         if (this.stlaceneKlavesy[this.klavesHore]) {
@@ -100,12 +83,18 @@ public class Hrac extends HernyObjekt implements Postava {
 
     @Override
     public void utoc(int cielX, int cielY, List<Strela> strely) {
-        if (!this.mozeUtocit() || !this.vystrelenaStrela) return;
-        double rx = (this.smerObr == 'L') ? -10.0 : 10.0;
-        strely.add(new Strela(
-                this.getX() + this.getSirka() / 2,
-                this.getY() + this.getVyska() / 2,
-                rx, 0, this.strana, Strela.TypStrely.NORMALNA));
+        if (!this.mozeUtocit() || !this.vystrelenaStrela) {
+            return;
+        }
+        double speedX;
+        if (this.smerObr == 'L') {
+            speedX = -10.0;
+        } else {
+            speedX = 10.0;
+        }
+        strely.add(new Strela(this.getX() + this.getSirka() / 2,
+                              this.getY() + this.getVyska() / 2,
+                                speedX, 0, this.strana, Strela.TypStrely.NORMALNA));
         this.resetVystrelena();
         this.cooldown = 15;
     }
@@ -193,15 +182,6 @@ public class Hrac extends HernyObjekt implements Postava {
         this.smerObr = s;
     }
 
-    public int getStrana() {
-        return this.strana;
-    }
-
-    public void setRychlost(int r) {
-        this.rychlost = r;
-    }
-
-
     public void setPohybX(int v) {
         this.pohybX = v;
     }
@@ -228,11 +208,12 @@ public class Hrac extends HernyObjekt implements Postava {
         if (img != null) {
             g.drawImage(img, this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
         } else {
-            g.setColor(this.strana == 0 ? new Color(30, 100, 200) : new Color(200, 50, 30));
-            g.fillRect(this.getX(), this.getY(), this.getSirka(), this.getVyska());
+            throw new NullPointerException("Nema obrazok");
         }
     }
 
     @Override
-    public boolean dotyk(HernyObjekt o) { return this.koliduje(o); }
+    public boolean dotyk(HernyObjekt o) {
+        return this.koliduje(o);
+    }
 }

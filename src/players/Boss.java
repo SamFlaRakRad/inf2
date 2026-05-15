@@ -3,7 +3,9 @@ package players;
 import core.HernyObjekt;
 import weapons.Strela;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
+
 import java.util.List;
 
 public class Boss extends HernyObjekt implements Postava {
@@ -36,16 +38,23 @@ public class Boss extends HernyObjekt implements Postava {
 
     @Override
     public void pohybSa() {
-        if (this.ciel == null) return;
+        if (this.ciel == null) {
+            return;
+        }
         int dx = this.ciel.getX() - this.getX();
         int dy = this.ciel.getY() - this.getY();
         double vzd = Math.sqrt(dx * dx + dy * dy);
         if (vzd > 0) {
-            this.pohybX = (int) ((dx / vzd) * this.rychlost);
-            this.pohybY = (int) ((dy / vzd) * this.rychlost);
+            this.pohybX = (int)((dx / vzd) * this.rychlost);
+            this.pohybY = (int)((dy / vzd) * this.rychlost);
         }
-        if (this.cooldownNormalny  > 0) this.cooldownNormalny--;
-        if (this.cooldownSpecialny > 0) this.cooldownSpecialny--;
+        if (this.cooldownNormalny  > 0) {
+            this.cooldownNormalny--;
+        }
+
+        if (this.cooldownSpecialny > 0) {
+            this.cooldownSpecialny--;
+        }
     }
 
     @Override
@@ -64,9 +73,15 @@ public class Boss extends HernyObjekt implements Postava {
             this.cooldownSpecialny = COOLDOWN_SPECIALNY;
             return;
         }
-        if (this.cooldownNormalny > 0) return;
-        if (this.faza == 1) this.vypalisNormalnu(cielX, cielY, strely);
-        else                this.vypalisSpread(cielX, cielY, strely);
+        if (this.cooldownNormalny > 0) {
+            return;
+        }
+        if (this.faza == 1) {
+            this.vypalisNormalnu(cielX, cielY, strely);
+        } else {
+            this.vypalisSpread(cielX, cielY, strely);
+        }
+
         this.cooldownNormalny = COOLDOWN_NORMALNY;
     }
 
@@ -102,7 +117,9 @@ public class Boss extends HernyObjekt implements Postava {
         double dx = cx - this.getX();
         double dy = cy - this.getY();
         double d  = Math.sqrt(dx * dx + dy * dy);
-        if (d == 0) return new double[]{spd, 0};
+        if (d == 0) {
+            return new double[]{spd, 0};
+        }
         return new double[]{(dx / d) * spd, (dy / d) * spd};
     }
 
@@ -140,7 +157,9 @@ public class Boss extends HernyObjekt implements Postava {
     @Override
     public void dostaZasah(int p) {
         this.hp -= p;
-        if (this.hp < 0) this.hp = 0;
+        if (this.hp < 0) {
+            this.hp = 0;
+        }
         if (this.faza == 1 && this.hp <= FAZA2_PRAH) {
             this.faza    = 2;
             this.rychlost = 5;

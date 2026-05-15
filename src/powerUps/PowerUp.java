@@ -3,11 +3,12 @@ package powerUps;
 import core.HernyObjekt;
 import players.Postava;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
 
 public abstract class PowerUp extends HernyObjekt implements Zberatelny {
 
-    protected boolean zobrany = false;
+    private boolean zobrany = false;
 
     public PowerUp(Image obrazok, int x, int y, int velkost) {
         super(obrazok, x, y, velkost, velkost);
@@ -17,7 +18,9 @@ public abstract class PowerUp extends HernyObjekt implements Zberatelny {
     public abstract void pouzi(Postava postava);
 
     @Override
-    public boolean jeZobrany() { return this.zobrany; }
+    public boolean jeZobrany() {
+        return this.zobrany;
+    }
 
     @Override
     public void pohyb() {
@@ -25,7 +28,9 @@ public abstract class PowerUp extends HernyObjekt implements Zberatelny {
     }
 
     @Override
-    public void oznacZobrany() { this.zobrany = true; }
+    public void oznacZobrany() {
+        this.zobrany = true;
+    }
 
     @Override
     public boolean dotyk(HernyObjekt objekt) {

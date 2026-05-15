@@ -3,7 +3,8 @@ package players;
 import core.HernyObjekt;
 import weapons.Strela;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.util.List;
 
 public class Bot extends Hrac implements Postava {
@@ -13,11 +14,15 @@ public class Bot extends Hrac implements Postava {
         super(obrazok, x, y, velkost, 'L', -1, -1, -1, -1, -1, stlaceneKlavesy, 1);
     }
 
-    public void sledujCiel(HernyObjekt ciel) { this.ciel = ciel; }
+    public void sledujCiel(HernyObjekt ciel) {
+        this.ciel = ciel;
+    }
 
     @Override
     public void pohybSa() {
-        if (this.ciel == null) return;
+        if (this.ciel == null) {
+            return;
+        }
         this.setPohybX(0);
         this.setPohybY(0);
 
@@ -41,11 +46,15 @@ public class Bot extends Hrac implements Postava {
 
     @Override
     public void utoc(int cielX, int cielY, List<Strela> strely) {
-        if (!this.mozeUtocit() || !this.getVystrelena()) return;
+        if (!this.mozeUtocit() || !this.getVystrelena()) {
+            return;
+        }
         double dx = cielX - this.getX();
         double dy = cielY - this.getY();
         double d  = Math.sqrt(dx * dx + dy * dy);
-        if (d == 0) return;
+        if (d == 0) {
+            return;
+        }
         strely.add(new Strela(
                 this.getX() + this.getSirka() / 2,
                 this.getY() + this.getVyska() / 2,

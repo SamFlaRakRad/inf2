@@ -1,6 +1,7 @@
 package core;
 
-import java.awt.*;
+import java.awt.Image;
+import java.awt.Graphics;
 
 /**
  * Táto trieda vytvára štvorce z vlastnými obrazkami ktoré umiestňuje na plátno 

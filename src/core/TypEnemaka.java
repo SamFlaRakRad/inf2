@@ -11,6 +11,6 @@ public enum TypEnemaka {
         this.enemak = enemak;
     }
     public String getEnemak() {
-        return enemak;
+        return this.enemak;
     }
 }

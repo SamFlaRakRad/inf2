@@ -30,11 +30,11 @@ public class Menu extends JFrame {
         this.setSize(400, 300);
         this.setLocationRelativeTo(null);
         
-        JPanel typHryPanel = new JPanel(new BorderLayout(10,10));
+        JPanel typHryPanel = new JPanel(new BorderLayout(10, 10));
         JLabel typHryNadpis = new JLabel("Vyberte typ hry", JLabel.CENTER);
         typHryNadpis.setFont(new Font("Arial", Font.BOLD, 24));
         typHryPanel.add(typHryNadpis, BorderLayout.NORTH);
-        JPanel vyberHier = new JPanel(new GridLayout(2,1,10,10));
+        JPanel vyberHier = new JPanel(new GridLayout(2, 1, 10, 10));
         
         JButton single = new JButton(TypHry.SINGLEPLAYER.getTypHry());
         single.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -121,11 +121,11 @@ public class Menu extends JFrame {
     }
 
     public void vyberEnemaka() {
-        JPanel vyberEnemaka = new JPanel(new BorderLayout(10,10));
+        JPanel vyberEnemaka = new JPanel(new BorderLayout(10, 10));
         JLabel enemyNadpis = new JLabel("Vyberte nepriateľa", JLabel.CENTER);
         enemyNadpis.setFont(new Font("Arial", Font.BOLD, 24));
         vyberEnemaka.add(enemyNadpis, BorderLayout.NORTH);
-        JPanel enemy = new JPanel(new GridLayout(2,1,10,10));
+        JPanel enemy = new JPanel(new GridLayout(2, 1, 10, 10));
 
         JButton bot = new JButton(TypEnemaka.BOT.getEnemak());
         bot.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -138,7 +138,7 @@ public class Menu extends JFrame {
             }
         });
 
-        JButton boss = new JButton(TypHry.MULTIPLAYER.getTypHry());
+        JButton boss = new JButton(TypEnemaka.BOSS.getEnemak());
         boss.setFont(new Font("Arial", Font.PLAIN, 20));
         boss.addActionListener(new ActionListener() {
             @Override

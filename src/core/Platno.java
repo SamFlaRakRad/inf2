@@ -1,10 +1,10 @@
 package core;
 
-import weapons.Strela;
+
 
 import javax.swing.JFrame;
-import java.awt.*;
-import java.util.Iterator;
+import java.awt.Dimension;
+
 
 /**
  * Vytvorenie plátna na ktorom sa bude hra hrať.
@@ -47,25 +47,27 @@ public class Platno {
         platno.setPreferredSize(new Dimension(this.sirkaPlatna, this.vyskaPlatna)); 
         platno.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
-        RezimHry hra;
         if (typ == TypHry.MULTIPLAYER) {
             platno.setTitle("Multiplayer");
-            hra = new Multiplayer(obtaznost);
+            Multiplayer hra = new Multiplayer(obtaznost);
+            platno.add(hra);
+            hra.requestFocus();
 
         } else {
             if (typEnemaka == TypEnemaka.BOT) {
                 platno.setTitle("Bot");
-                hra = new Singleplayer(obtaznost, TypEnemaka.BOT);
+                Singleplayer hra = new Singleplayer(obtaznost, TypEnemaka.BOT);
+                platno.add(hra);
+                hra.requestFocus();
 
             } else {
                 platno.setTitle("Boss");
-                hra = new Singleplayer(obtaznost, TypEnemaka.BOSS);
+                Singleplayer hra = new Singleplayer(obtaznost, TypEnemaka.BOSS);
+                platno.add(hra);
+                hra.requestFocus();
             }
         }
 
-        platno.add(hra);
-        hra.requestFocus();
         platno.pack();
         platno.setVisible(true);
         
