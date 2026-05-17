@@ -85,7 +85,7 @@ public class Menu extends JFrame {
         lahka.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Menu.this.vyberObtaznost(Obtiaznost.LAHKA, Menu.this.getTyp(), Menu.this.getEnemak());
+                Menu.this.start(Obtiaznost.LAHKA, Menu.this.getTyp(), Menu.this.getEnemak());
             }
         });
 
@@ -96,7 +96,7 @@ public class Menu extends JFrame {
         stredna.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Menu.this.vyberObtaznost(Obtiaznost.STREDNA,  Menu.this.getTyp(), Menu.this.getEnemak());
+                Menu.this.start(Obtiaznost.STREDNA,  Menu.this.getTyp(), Menu.this.getEnemak());
             }
         });
 
@@ -107,7 +107,7 @@ public class Menu extends JFrame {
         tazka.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Menu.this.vyberObtaznost(Obtiaznost.TAZKA,  Menu.this.getTyp(), Menu.this.getEnemak());
+                Menu.this.start(Obtiaznost.TAZKA,  Menu.this.getTyp(), Menu.this.getEnemak());
             }
         });
 
@@ -166,7 +166,7 @@ public class Menu extends JFrame {
     /**
      * Spustí hernú aplikáciu s vybratými parametrami.
      */
-    private void vyberObtaznost(Obtiaznost obtaznost, TypHry typ, TypEnemaka typEnemaka) {
+    private void start(Obtiaznost obtaznost, TypHry typ, TypEnemaka typEnemaka) {
         this.vybrata = obtaznost;
         this.typ = typ;
         this.enemak = typEnemaka;
