@@ -106,7 +106,7 @@ public abstract class Ai extends HernyObjekt implements Postava {
         int x = cielX;
         int y = cielY;
 
-        // Predikcia pohybu cieľa
+        // Predikcia pohybu
         if (cielPohybX > 0) {
             x = Math.min(this.pocetS - 1, cielX + offset);
         } else if (cielPohybX < 0) {
@@ -117,7 +117,7 @@ public abstract class Ai extends HernyObjekt implements Postava {
             y = Math.max(0, cielY - offset);
         }
 
-        // Ak je predpovedaná pozícia vo stene, zostaneme pri aktuálnej pozícií cieľa
+        // Ak predpoveda poziciu stenu, zostane targetovat ciel
         if (this.mapa[y].charAt(x) == 'X') {
             x = cielX;
             y = cielY;
