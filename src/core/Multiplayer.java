@@ -107,8 +107,8 @@ public class Multiplayer extends RezimHry {
         this.healObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/heal.png"))).getImage();
         this.speedObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/speed.png"))).getImage();
 
-        for (int r = 0; r < super.getRIADKY(); r++) {
-            for (int s = 0; s < super.getSTLPCE(); s++) {
+        for (int r = 0; r < super.getRiadky(); r++) {
+            for (int s = 0; s < super.getStlpce(); s++) {
                 char ch = this.getMapa()[r].charAt(s);
                 int x = s * super.getVelkostS();
                 int y = r * super.getVelkostS();
@@ -157,8 +157,8 @@ public class Multiplayer extends RezimHry {
 
         while (umiestnene < this.pocetPickupov && pokus < maxPokusov) {
             pokus++;
-            int row = rand.nextInt(super.getRIADKY());
-            int col = rand.nextInt(super.getSTLPCE());
+            int row = rand.nextInt(super.getRiadky());
+            int col = rand.nextInt(super.getStlpce());
             if (this.getMapa()[row].charAt(col) != '.') {
                 continue;
             }

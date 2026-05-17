@@ -105,8 +105,8 @@ public class Singleplayer extends RezimHry {
         this.speedObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/speed.png"))).getImage();
         this.nabojObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/naboje.png"))).getImage();
 
-        for (int r = 0; r < super.getRIADKY(); r++) {
-            for (int s = 0; s < super.getSTLPCE(); s++) {
+        for (int r = 0; r < super.getRiadky(); r++) {
+            for (int s = 0; s < super.getStlpce(); s++) {
                 char ch = this.getMapa()[r].charAt(s);
                 int x = s * super.getVelkostS();
                 int y = r * super.getVelkostS();
@@ -247,8 +247,8 @@ public class Singleplayer extends RezimHry {
 
         while (counter < this.pocetPickupov && pokus < maxPokusov) {
             pokus++;
-            int row = rand.nextInt(super.getRIADKY());
-            int col = rand.nextInt(super.getSTLPCE());
+            int row = rand.nextInt(super.getRiadky());
+            int col = rand.nextInt(super.getStlpce());
             if (this.getMapa()[row].charAt(col) != '.') {
                 continue;
             }

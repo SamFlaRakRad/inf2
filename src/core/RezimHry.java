@@ -86,11 +86,11 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         return this.stopnutaHra;
     }
 
-    public int getRIADKY() {
+    public int getRiadky() {
         return RIADKY;
     }
 
-    public int getSTLPCE() {
+    public int getStlpce() {
         return STLPCE;
     }
 

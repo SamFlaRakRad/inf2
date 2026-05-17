@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="semka:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/semka_jar</output-path>
+    <root id="archive" name="semka.jar">
+      <element id="module-output" name="semka" />
+    </root>
+  </artifact>
+</component>
