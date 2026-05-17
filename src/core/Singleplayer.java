@@ -16,6 +16,7 @@ import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Random;
@@ -52,13 +53,15 @@ public class Singleplayer extends RezimHry {
     private int pocetPickupov;
     private int speedBoostTrvanie;
     private int healKoef;
+    private ArrayList<Stvorec> nabojeNaMape;
+    private Image nabojObr;
 
     public Singleplayer(Obtiaznost obtiaznost, TypEnemaka typEnemaka) {
         super(obtiaznost);
         switch (obtiaznost) {
             case LAHKA:
                 this.zacinajuceNaboje = 20;
-                this.pocetPickupov = 4;
+                this.pocetPickupov = 10;
                 this.speedBoostTrvanie = 300;
                 this.healKoef = 50;
                 this.poskodenieHraca = 25;
@@ -66,7 +69,7 @@ public class Singleplayer extends RezimHry {
                 break;
             case STREDNA:
                 this.zacinajuceNaboje = 10;
-                this.pocetPickupov = 2;
+                this.pocetPickupov = 7;
                 this.speedBoostTrvanie = 150;
                 this.healKoef = 25;
                 this.poskodenieHraca = 10;
@@ -74,7 +77,7 @@ public class Singleplayer extends RezimHry {
                 break;
             case TAZKA:
                 this.zacinajuceNaboje =  5;
-                this.pocetPickupov = 1;
+                this.pocetPickupov = 5;
                 this.speedBoostTrvanie =  75;
                 this.healKoef = 10;
                 this.poskodenieHraca = 5;
@@ -91,6 +94,7 @@ public class Singleplayer extends RezimHry {
 
     @Override
     public void nacitajPostavy() {
+        this.nabojeNaMape = new ArrayList<>();
         this.hrac1Vpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vpravo.png"))).getImage();
         this.hrac1Vlavo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vlavo.png"))).getImage();
         this.botVlavo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/botVlavo.png"))).getImage();
@@ -99,7 +103,7 @@ public class Singleplayer extends RezimHry {
         this.bossVpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/bossVpravo.png"))).getImage();
         this.healObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/heal.png"))).getImage();
         this.speedObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/speed.png"))).getImage();
-
+        this.nabojObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/naboje.png"))).getImage();
 
         for (int r = 0; r < super.getRIADKY(); r++) {
             for (int s = 0; s < super.getSTLPCE(); s++) {
@@ -122,6 +126,9 @@ public class Singleplayer extends RezimHry {
                         bot.setObrazky(this.botVlavo, this.botVpravo);
                         this.protivnik = bot;
                     }
+                }
+                if (ch == 'A') {
+                    this.nabojeNaMape.add(new Stvorec(this.nabojObr, x, y, super.getVelkostS(), super.getVelkostS()));
                 }
             }
         }
@@ -195,6 +202,18 @@ public class Singleplayer extends RezimHry {
 
     @Override
     public void skontrolujPickupy() {
+        Stvorec zobrany = null;
+        for (Stvorec naboj : this.nabojeNaMape) {
+            if (this.hrac.koliduje(naboj)) {
+                this.zasobnikHraca += this.zacinajuceNaboje;
+                zobrany = naboj;
+                break;
+            }
+        }
+        if (zobrany != null) {
+            this.nabojeNaMape.remove(zobrany);
+        }
+
         for (Zberatelny z : this.getPickupy()) {
             if (!z.jeZobrany() && this.hrac.koliduje((HernyObjekt)z)) {
                 if (z instanceof Heal && this.hrac.getHP() == 100) {
@@ -210,6 +229,9 @@ public class Singleplayer extends RezimHry {
     public void kresliPostavy(Graphics g) {
         this.hrac.paint(g);
         this.protivnik.paint(g);
+        for (Stvorec naboj : this.nabojeNaMape) {
+            naboj.paint(g);
+        }
     }
 
     @Override
@@ -236,8 +258,7 @@ public class Singleplayer extends RezimHry {
             if (counter % 2 == 0) {
                 this.getPickupy().add(new Heal(this.healObr, x, y, super.getVelkostS(), this.healKoef));
             } else {
-                this.getPickupy().add(new Speed(this.speedObr, x, y,
-                        super.getVelkostS(), this.speedBoostTrvanie));
+                this.getPickupy().add(new Speed(this.speedObr, x, y, super.getVelkostS(), this.speedBoostTrvanie));
             }
             counter++;
         }
@@ -288,11 +309,12 @@ public class Singleplayer extends RezimHry {
     public void restart() {
         Generator gen = new Generator();
         this.setMapa(gen.vytvorMapu(this.getObtiaznost()));
+        this.nabojeNaMape.clear();
         this.nacitajSteny();
         this.getStrely().clear();
         this.nacitajPostavy();
         this.pridajPickupy();
-        this.zasobnikHraca  = this.zacinajuceNaboje;
+        this.zasobnikHraca = this.zacinajuceNaboje;
         this.hracVyhral = false;
         this.protivnikVyhral = false;
         this.setStopnutaHra(false);
