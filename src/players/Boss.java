@@ -32,10 +32,14 @@ public class Boss extends Ai {
     private int fullAuto = 5;
 
     private char smerObr = 'L';
+    private Image vlavo;
+    private Image vpravo;
 
     public Boss(Image obrazok, int x, int y, int velkost) {
         super(obrazok, x, y, velkost);
         this.hp = MAX_HP;
+        this.vlavo = obrazok;
+        this.vpravo = obrazok;
     }
 
     @Override
@@ -156,6 +160,20 @@ public class Boss extends Ai {
                 speedX, 0.0, 1, TypStrely.NORMALNA));
     }
 
+    @Override
+    public Image getVlavo() {
+        return this.vlavo;
+    }
+
+    @Override
+    public Image getVpravo() {
+        return this.vpravo;
+    }
+
+    public void setObrazky(Image vlavo, Image vpravo) {
+        this.vlavo = vlavo;
+        this.vpravo = vpravo;
+    }
 
     @Override
     public boolean mozeUtocit() {

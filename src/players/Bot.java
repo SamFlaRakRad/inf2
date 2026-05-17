@@ -26,11 +26,16 @@ public class Bot extends Ai {
     private boolean vystrelenaStrela = false;
 
     private Hrac ciel;
+    private Image vlavo;
+    private Image vpravo;
 
     public Bot(Image obrazok, int x, int y, int velkost) {
         super(obrazok, x, y, velkost);
+        this.vlavo = obrazok;
+        this.vpravo = obrazok;
     }
 
+    @Override
     public void sledujCiel(Hrac ciel) {
         this.ciel = ciel;
     }
@@ -76,6 +81,21 @@ public class Bot extends Ai {
                 speedX, 0.0, 1, TypStrely.NORMALNA));
         this.vystrelenaStrela = false;
         this.cooldown = 30;
+    }
+
+    @Override
+    public Image getVlavo() {
+        return this.vlavo;
+    }
+
+    @Override
+    public Image getVpravo() {
+        return this.vpravo;
+    }
+
+    public void setObrazky(Image vlavo, Image vpravo) {
+        this.vlavo = vlavo;
+        this.vpravo = vpravo;
     }
 
     @Override

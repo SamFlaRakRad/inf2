@@ -34,11 +34,25 @@ public abstract class Ai extends HernyObjekt implements Postava {
         this.pocetS = mapa[0].length();
         this.velkostS = velkostS;
     }
+
+    /**
+    * Metoda nastavuje ciel ktory bude ai nasledovat
+    */
     public abstract void sledujCiel(Hrac ciel);
 
     /**
+     * Getter pre obrazok vlavo
+     */
+    public abstract Image getVlavo();
+
+    /**
+     * Getter pre obrazok pravo
+     */
+    public abstract Image getVpravo();
+    /**
      * Getter pre mapu.
      */
+
     public String[] getMapa() {
         return this.mapa;
     }

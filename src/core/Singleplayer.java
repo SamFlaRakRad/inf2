@@ -115,9 +115,12 @@ public class Singleplayer extends RezimHry {
                 }
                 if (ch == 'P') {
                     if (this.jeBoss) {
-                        this.protivnik = new Boss(this.bossVlavo, x, y, super.getVelkostS());
+                        Boss boss = new Boss(this.bossVlavo, x, y, super.getVelkostS());
+                        boss.setObrazky(this.bossVlavo, this.bossVpravo);
+                        this.protivnik = boss;
                     } else {
                         Bot bot = new Bot(this.botVlavo, x, y, super.getVelkostS());
+                        bot.setObrazky(this.botVlavo, this.botVpravo);
                         this.protivnik = bot;
                     }
                 }
@@ -125,11 +128,7 @@ public class Singleplayer extends RezimHry {
         }
 
         if (this.hrac != null && this.protivnik != null) {
-            if (this.protivnik instanceof Boss) {
-                this.protivnik.sledujCiel(this.hrac);
-            } else if (this.protivnik instanceof Bot) {
-                ((Bot)this.protivnik).sledujCiel(this.hrac);
-            }
+            this.protivnik.sledujCiel(this.hrac);
         }
 
         if (this.protivnik != null) {
@@ -148,18 +147,10 @@ public class Singleplayer extends RezimHry {
         super.pohybVSmere(this.hrac, this.hrac.getPohybX(), this.hrac.getPohybY());
 
         this.protivnik.pohybSa();
-        if (this.protivnik instanceof Boss) {
-            if (this.protivnik.getSmerObr() == 'L') {
-                this.protivnik.setObrazok(this.bossVlavo);
-            } else {
-                this.protivnik.setObrazok(this.bossVpravo);
-            }
-        } else if (this.protivnik instanceof Bot) {
-            if (this.protivnik.getSmerObr() == 'L') {
-                this.protivnik.setObrazok(this.botVlavo);
-            } else {
-                this.protivnik.setObrazok(this.botVpravo);
-            }
+        if (this.protivnik.getSmerObr() == 'L') {
+            this.protivnik.setObrazok(this.protivnik.getVlavo());
+        } else {
+            this.protivnik.setObrazok(this.protivnik.getVpravo());
         }
         super.pohybVSmere(this.protivnik, this.protivnik.getPohybX(), this.protivnik.getPohybY());
 
