@@ -2,174 +2,194 @@ package players;
 
 import core.HernyObjekt;
 import weapons.Strela;
+import weapons.TypStrely;
 
-import javax.swing.*;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.util.ArrayList;
+import java.util.Random;
 
-import java.util.List;
+/**
+ * Trieda Boss
+ * Boss má dva fázy
+ * Fáza sa mení, keď Boss stratí viac ako 50% zdravia.
+ * Boss používa rôzne typy útokov: normálny, shotgun, full-auto a sniper.
+ *
+ * @author Samuel Ďuriš
+ * @version V3
+ */
+public class Boss extends Ai implements Postava {
 
-public class Boss extends HernyObjekt implements Postava {
     private int hp;
-    private static final int MAX_HP = 10;
+    private static final int MAX_HP = 100;
     private int rychlost = 3;
 
-    private HernyObjekt ciel;
-
+    private Hrac ciel;
     private int faza = 1;
-    private static final int FAZA2_PRAH = MAX_HP / 2;
+    private static final int POLHP = MAX_HP / 2;
+    private int startCooldown = 30;
+    private int cooldownNormalny = 30;
+    private int fullAuto = 10;
 
-    private int cooldownNormalny  = 0;
-    private int cooldownSpecialny = 0;
-    private static final int COOLDOWN_NORMALNY  = 50;
-    private static final int COOLDOWN_SPECIALNY = 200;
-
-    private int pohybX = 0;
-    private int pohybY = 0;
+    private char smerObr = 'L';
 
     public Boss(Image obrazok, int x, int y, int velkost) {
-        super(obrazok, x, y, velkost, velkost);
+        super(obrazok, x, y, velkost);
         this.hp = MAX_HP;
     }
 
-    public void setCiel(HernyObjekt ciel) {
+    public void setCiel(Hrac ciel) {
         this.ciel = ciel;
     }
 
-
     @Override
     public void pohybSa() {
-        if (this.ciel == null) {
-            return;
-        }
-        int dx = this.ciel.getX() - this.getX();
-        int dy = this.ciel.getY() - this.getY();
-        double vzd = Math.sqrt(dx * dx + dy * dy);
-        if (vzd > 0) {
-            this.pohybX = (int)((dx / vzd) * this.rychlost);
-            this.pohybY = (int)((dy / vzd) * this.rychlost);
-        }
-        if (this.cooldownNormalny  > 0) {
-            this.cooldownNormalny--;
+
+        int x = this.ciel.getX() - this.getX();
+        int y = this.ciel.getY() - this.getY();
+        if (x >= 0) {
+            this.smerObr = 'R';
+        } else {
+            this.smerObr = 'L';
         }
 
-        if (this.cooldownSpecialny > 0) {
-            this.cooldownSpecialny--;
-        }
-    }
+        if (this.getMapa() != null) {
+            int bossX = (this.getX() + this.getSirka() / 2) / this.getVelkostS();
+            int bossY  = (this.getY() + this.getVyska() / 2) / this.getVelkostS();
+            int cielGX = (this.ciel.getX() + this.ciel.getSirka() / 2) / this.getVelkostS();
+            int cielGY = (this.ciel.getY() + this.ciel.getVyska() / 2) / this.getVelkostS();
 
-    @Override
-    public int getPohybX() {
-        return this.pohybX;
-    }
-    @Override
-    public int getPohybY() {
-        return this.pohybY;
-    }
+            int[] smer = this.pathfinding( bossX, bossY, cielGX, cielGY, this.ciel.getPohybX(), this.ciel.getPohybY());
 
-    @Override
-    public void utoc(int cielX, int cielY, List<Strela> strely) {
-        if (this.cooldownSpecialny <= 0) {
-            this.vypalisRaketu(cielX, cielY, strely);
-            this.cooldownSpecialny = COOLDOWN_SPECIALNY;
-            return;
+            super.korekcia(smer, bossX, bossY, this.rychlost);
         }
         if (this.cooldownNormalny > 0) {
-            return;
+            this.cooldownNormalny--;
         }
+        if (Math.abs(x) < 200 && Math.abs(y) < 200) {
+            this.vystrel();
+        }
+    }
+
+
+    @Override
+    public void utoc(int cielX, int cielY, ArrayList<Strela> strely) {
         if (this.faza == 1) {
-            this.vypalisNormalnu(cielX, cielY, strely);
+            this.normal(strely);
+            this.resetCooldown();
         } else {
-            this.vypalisSpread(cielX, cielY, strely);
+            Random rand = new Random();
+            switch (rand.nextInt(4)) {
+                case 0:
+                    this.normal(strely);
+                    this.resetCooldown();
+                    break;
+                case 1:
+                    this.broka(strely);
+                    this.resetCooldown();
+                    break;
+                case 2:
+                    this.fullAuto(strely);
+                    this.resetCooldown();
+                    break;
+                case 3:
+                    this.snipa(strely);
+                    this.resetCooldown();
+                    break;
+
+            }
+
         }
 
-        this.cooldownNormalny = COOLDOWN_NORMALNY;
     }
 
-    private void vypalisNormalnu(int cx, int cy, List<Strela> st) {
-        double[] s = this.smer(cx, cy, 7.0);
-        st.add(new Strela(this.getX() + this.getSirka() / 2,
-                this.getY() + this.getVyska() / 2,
-                s[0], s[1], 1, Strela.TypStrely.NORMALNA));
+    public void normal(ArrayList<Strela> strely) {
+        double speedX;
+        if (this.smerObr == 'L') {
+            speedX = -9.0;
+        } else {
+            speedX = 9.0;
+        }
+        strely.add(new Strela(this.getX() + this.getSirka() / 2, this.getY() + this.getVyska() / 2,
+                            speedX, 0.0, 1, TypStrely.NORMALNA));
     }
 
-    private void vypalisSpread(int cx, int cy, List<Strela> st) {
-        double[] uhly = {-0.35, 0, 0.35};
-        for (double u : uhly) {
-            double[] s  = this.smer(cx, cy, 6.0);
-            double rx   = s[0] * Math.cos(u) - s[1] * Math.sin(u);
-            double ry   = s[0] * Math.sin(u) + s[1] * Math.cos(u);
-            st.add(new Strela(this.getX() + this.getSirka() / 2,
+    public void broka(ArrayList<Strela> strely) {
+        double speedX;
+        if (this.smerObr == 'L') {
+            speedX = -8.0;
+        } else {
+            speedX = 8.0;
+        }
+        int[]  spread = {-12, 0, 12};
+        for (int s : spread) {
+            strely.add(new Strela(this.getX() + this.getSirka() / 2,
+                    this.getY() + this.getVyska() / 2 + s,
+                    speedX, 0.0, 1, TypStrely.SHOTGUN));
+        }
+    }
+
+    public void fullAuto(ArrayList<Strela> strely) {
+        double speedX;
+        if (this.smerObr == 'L') {
+            speedX = -7.0;
+        } else {
+            speedX = 7.0;
+        }
+        for (int i = 0; i < 6; i++) {
+            strely.add(new Strela(
+                    this.getX() + this.getSirka() / 2,
                     this.getY() + this.getVyska() / 2,
-                    rx, ry, 1, Strela.TypStrely.BOSS_SPREAD));
+                    speedX, 0.0, 1, TypStrely.NORMALNA));
         }
+        this.cooldownNormalny = this.fullAuto;
     }
 
-    private void vypalisRaketu(int cx, int cy, List<Strela> st) {
-        double[] s  = this.smer(cx, cy, 4.0);
-        Strela r = new Strela(this.getX() + this.getSirka() / 2,
-                this.getY() + this.getVyska() / 2,
-                s[0], s[1], 1, Strela.TypStrely.RAKETA);
-        r.setCiel(cx, cy);
-        st.add(r);
+    public void snipa(ArrayList<Strela> strely) {
+        double speedX;
+        if (this.smerObr == 'L') {
+            speedX = -20.0;
+        } else {
+            speedX = 20.0;
+        }
+        strely.add(new Strela(this.getX() + this.getSirka() / 2, this.getY() + this.getVyska() / 2,
+                speedX, 0.0, 1, TypStrely.NORMALNA));
     }
 
-    private double[] smer(int cx, int cy, double spd) {
-        double dx = cx - this.getX();
-        double dy = cy - this.getY();
-        double d  = Math.sqrt(dx * dx + dy * dy);
-        if (d == 0) {
-            return new double[]{spd, 0};
-        }
-        return new double[]{(dx / d) * spd, (dy / d) * spd};
-    }
 
     @Override
     public boolean mozeUtocit() {
-        return this.cooldownNormalny <= 0 || this.cooldownSpecialny <= 0;
+        return this.cooldownNormalny <= 0;
     }
-
     @Override
     public void vystrel() {
 
     }
-
     @Override
     public void resetCooldown() {
-        this.cooldownNormalny = COOLDOWN_NORMALNY;
+        this.cooldownNormalny = this.startCooldown;
     }
-
     @Override
-    public int  getHP() {
+    public int getHP() {
         return this.hp;
     }
-
     @Override
-    public int  getMaxHP() {
+    public int getMaxHP() {
         return MAX_HP;
     }
 
     @Override
     public void setHP(int hp) {
-        this.hp = Math.min(Math.max(hp, 0), MAX_HP);
-    }
-
-
-    @Override
-    public void dostaZasah(int p) {
-        this.hp -= p;
-        if (this.hp < 0) {
-            this.hp = 0;
-        }
-        if (this.faza == 1 && this.hp <= FAZA2_PRAH) {
-            this.faza    = 2;
-            this.rychlost = 5;
-        }
+        this.hp = Math.clamp(hp, 0, MAX_HP);
     }
 
     @Override
     public void dostanZasah(int p) {
-        this.dostaZasah(p);
+        this.hp = Math.max(0, this.hp - p);
+        if (this.faza == 1 && this.hp <= POLHP) {
+            this.faza = 2;
+            this.rychlost = 5;
+        }
     }
 
     @Override
@@ -178,37 +198,28 @@ public class Boss extends HernyObjekt implements Postava {
     }
 
     @Override
-    public int dealDmg() {
-        return 20;
-    }
-    @Override
-    public int getRychlost() {
-        return this.rychlost;
-    }
-
-    @Override
     public int getX() {
         return super.getX();
     }
-
     @Override
     public int getY() {
         return super.getY();
     }
-
+    @Override
+    public char getSmerObr() {
+        return this.smerObr;
+    }
     public int getFaza() {
         return this.faza;
     }
-
-    @Override public void pohyb() {
+    @Override
+    public void pohyb() {
 
     }
-
     @Override
     public void paint(Graphics g) {
 
     }
-
     @Override
     public boolean dotyk(HernyObjekt o) {
         return this.koliduje(o);

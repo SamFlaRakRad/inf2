@@ -1,10 +1,9 @@
 package core;
 
 /**
- * Enum trieda v ktorej vyberám pre-sety hry 
- * 
- * @author (Samuel Ďuriš) 
- * @version (V3)
+ * Enum trieda reprezentujúca úrovne obtiažnosti hry.
+ * @author Samuel Ďuriš
+ * @version V3
  */
 public enum Obtiaznost {
     LAHKA("Ľahká"),
@@ -14,14 +13,14 @@ public enum Obtiaznost {
     private String nazov;
     
     /**
-     * Konštruktor
+     * Konštruktor - inicializuje úroveň obtiažnosti s jej názvom.
      */
     Obtiaznost(String nazov) {
         this.nazov = nazov;
     }
     
     /**
-     * getter jednotlivy pre-set
+     * Getter pre názov úrovne obtiažnosti.
      */
     public String getNazov() {
         return this.nazov;

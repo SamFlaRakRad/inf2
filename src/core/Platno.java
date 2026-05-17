@@ -7,27 +7,26 @@ import java.awt.Dimension;
 
 
 /**
- * Vytvorenie plátna na ktorom sa bude hra hrať.
- * 
- * @author (Samuel Ďuriš) 
- * @version (V3)
+ * Trieda Platno - vytvorí hernú okno (JFrame) s hernými komponentmi.
+ * @author Samuel Ďuriš
+ * @version V3
  */
 public class Platno {
     /**
-     * max počet riadkov do ktorých sa môžu vykreslovať štvorce
+     * Maximálny počet riadkov do ktorých sa môžu vykreslovať štvorce
      */
-    private static  final int RIADKY = 23; 
-    
+    private static final int RIADKY = 23;
+
     /**
-     * max počet stlpcov do ktorých sa môžu vykreslovať štvorce
+     * Maximálny počet stĺpcov do ktorých sa môžu vykreslovať štvorce
      */
-    private static  final int STLPCE = 26;
-    
+    private static final int STLPCE = 26;
+
     /**
-     * velkosť strany štvorca
+     * Veľkosť strany štvorca v pixeloch
      */
-    private static  final int VELKOST_S = 32;
-    
+    private static final int VELKOST_S = 32;
+
     private int sirkaPlatna = this.STLPCE * this.VELKOST_S - 19;
     private int vyskaPlatna = this.RIADKY * this.VELKOST_S;
     
@@ -36,6 +35,9 @@ public class Platno {
     private TypEnemaka typEnemaka;
 
     
+    /**
+     * Konštruktor - vytvára herné okno s hernými komponentmi.
+     */
     public Platno(Obtiaznost obtaznost, TypHry typ, TypEnemaka typEnemaka) {
         this.obtaznost = obtaznost;
         this.typ = typ;

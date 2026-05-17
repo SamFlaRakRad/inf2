@@ -1,11 +1,14 @@
 package core;
 
 import java.util.Random;
+
 /**
- * Generátor mapy ktorý vytvorí mapu na zaklade zadanej obtiažnosti.
- * 
- * @author (Samuel Ďuriš) 
- * @version (V3)
+ * Generátor mapy - vytvára hernú mapu na základe zadanej obtiažnosti.
+ * Mapa je generovaná procedurálne s náhodnými stenami a garantuje,
+ * že všetky oblasti sú dosiahnuteľné z pozícií hráčov.
+ *
+ * @author Samuel Ďuriš
+ * @version V3
  */
 public class Generator {
     private static final int RIADKY = 20;
@@ -17,30 +20,32 @@ public class Generator {
     private int hrac2Y = RIADKY / 2;
     
     /**
-     * Konštruktor
+     * Konštruktor - incializuje generátor mapy s novým Random objektom.
      */
     public Generator() {
         this.random = new Random();
     }
 
     /**
-     * Vytvorí mapu podľa obtiažnosti
+     * Vytvorí mapu na základe obtiažnosti.
+     * Vyššia obtiažnosť znamená viac stien a menej nábojov.
+     *
      */
     public String[] vytvorMapu(Obtiaznost obtiaznost) {
         String[] mapa;
         switch (obtiaznost) {
             case LAHKA:
-           // Ľahká - 30% stien, 5 nábojov
+                // Ľahká - 30% stien, 5 nábojov
                 mapa = this.opravenaMapu(0.30, 5);
                 break;
 
             case STREDNA:
-            // Stredná - 40% stien, 4 náboje
+                // Stredná - 40% stien, 4 náboje
                 mapa = this.opravenaMapu(0.40, 4);
                 break;
 
             case TAZKA:
-            // Ťažká - 50% stien, 3 náboje
+                // Ťažká - 50% stien, 3 náboje
                 mapa = this.opravenaMapu(0.50, 3);
                 break;
             default: 

@@ -2,15 +2,19 @@ package players;
 
 import weapons.Strela;
 import core.HernyObjekt;
+import weapons.TypStrely;
+
 import java.awt.Graphics;
 import java.awt.Image;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Táto trieda vytvára hráčov.
- * 
- * @author (Samuel Ďuriš) 
- * @version (V3)
+ * Trieda Hrac - predstavuje hráčovu postavu, ktorú ovláda hráč.
+ * Hráč môž pohybovať postavou pomocou kláves, strieľať a zbierať powerupy.
+ * Má zdravie, munitýu, rýchlosť pohybu a možnosť aktivovania speedupov.
+ *
+ * @author Samuel Ďuriš
+ * @version V3
  */
 public class Hrac extends HernyObjekt implements Postava {
     private char smerObr;
@@ -50,9 +54,13 @@ public class Hrac extends HernyObjekt implements Postava {
 
     @Override
     public void pohybSa() {
-        if (this.stlaceneKlavesy == null) {
-            return;
+        if (this.speedBoostTiky > 0) {
+            this.speedBoostTiky--;
+            if (this.speedBoostTiky == 0) {
+                this.rychlost = RYCHLOST_ZAKLADNA;
+            }
         }
+
         this.pohybX = 0;
         this.pohybY = 0;
         if (this.stlaceneKlavesy[this.klavesHore]) {
@@ -74,18 +82,13 @@ public class Hrac extends HernyObjekt implements Postava {
         }
     }
 
-    public void spracujPohyb(boolean[] keys) {
-        this.stlaceneKlavesy = keys;
-        this.pohybSa();
-    }
-
     @Override
     public void vystrel() {
         this.vystrelenaStrela = true;
     }
 
     @Override
-    public void utoc(int cielX, int cielY, List<Strela> strely) {
+    public void utoc(int cielX, int cielY, ArrayList<Strela> strely) {
         if (!this.mozeUtocit() || !this.vystrelenaStrela) {
             return;
         }
@@ -97,9 +100,9 @@ public class Hrac extends HernyObjekt implements Postava {
         }
         strely.add(new Strela(this.getX() + this.getSirka() / 2,
                               this.getY() + this.getVyska() / 2,
-                                speedX, 0, this.strana, Strela.TypStrely.NORMALNA));
+                                speedX, 0, this.strana, TypStrely.NORMALNA));
         this.resetVystrelena();
-        this.cooldown = 15;
+        this.cooldown = 10;
     }
 
     public void activateSpeedBoost(int tiky) {
@@ -138,21 +141,8 @@ public class Hrac extends HernyObjekt implements Postava {
     }
 
     @Override
-    public void dostaZasah(int p) {
-        this.dostanZasah(p);
-    }
-
-    @Override
     public boolean jeZiva() {
         return this.hp > 0;
-    }
-
-    @Override
-    public int dealDmg() {
-        return 25;
-    }
-    @Override public int getRychlost() {
-        return this.rychlost;
     }
 
     @Override
@@ -184,25 +174,6 @@ public class Hrac extends HernyObjekt implements Postava {
 
     public char getSmerObr() {
         return this.smerObr;
-    }
-
-    public void setSmerObr(char s) {
-        this.smerObr = s;
-    }
-
-    public void setPohybX(int v) {
-        this.pohybX = v;
-    }
-    public void setPohybY(int v) {
-        this.pohybY = v;
-    }
-    public void setCooldown(int v) {
-        this.cooldown = v;
-    }
-    public void decrementCooldown() {
-        if (this.cooldown > 0) {
-            this.cooldown--;
-        }
     }
 
     @Override

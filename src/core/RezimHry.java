@@ -2,9 +2,6 @@ package core;
 
 import weapons.Strela;
 import powerUps.Zberatelny;
-import powerUps.Heal;
-import powerUps.Speed;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.awt.Graphics;
@@ -19,9 +16,12 @@ import java.awt.event.KeyEvent;
 import java.util.Objects;
 
 /**
-
- * @author (Samuel Ďuriš)
- * @version (V5)
+ * Abstraktná trieda RezimHry - predstavuje základný herný režim.
+ * Spravuje hernú slučku, pohyb striel, útoky, kolízie a vykreslenie herného obsahu.
+ * Konkrétne herné režimy (Singleplayer, Multiplayer) rozširujú túto triedu a implementujú špecifické kód pre daný režim.
+ *
+ * @author Samuel Ďuriš
+ * @version V3
  */
 public abstract class RezimHry extends JPanel implements ActionListener, KeyListener {
 
@@ -34,17 +34,17 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     private ArrayList<Zberatelny> pickupy;
 
     private boolean[] stlaceneKlavesy = new boolean[256];
-    private boolean   stopnutaHra     = false;
+    private boolean stopnutaHra     = false;
 
-    private String[]   mapa;
+    private String[] mapa;
     private Obtiaznost obtiaznost;
-    private Timer      gameLoop;
-    private Image      obrazokSteny;
+    private Timer gameLoop;
+    private Image obrazokSteny;
 
     public RezimHry(Obtiaznost obtiaznost) {
-        this.obtiaznost  = obtiaznost;
-        this.steny   = new ArrayList<>();
-        this.strely  = new ArrayList<>();
+        this.obtiaznost = obtiaznost;
+        this.steny = new ArrayList<>();
+        this.strely = new ArrayList<>();
         this.pickupy = new ArrayList<>();
 
         this.addKeyListener(this);
@@ -77,7 +77,8 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         return this.stlaceneKlavesy;
     }
     public String[] getMapa() {
-        return this.mapa; }
+        return this.mapa;
+    }
     public Obtiaznost getObtiaznost() {
         return this.obtiaznost;
     }
@@ -86,19 +87,20 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     }
 
     public int getRIADKY() {
-        return this.RIADKY;
+        return RIADKY;
     }
 
     public int getSTLPCE() {
-        return this.STLPCE;
+        return STLPCE;
     }
 
     public int getVelkostS() {
-        return this.VELKOST_S;
+        return VELKOST_S;
     }
 
     public void setStopnutaHra(boolean v) {
-        this.stopnutaHra = v; }
+        this.stopnutaHra = v;
+    }
     public void setMapa(String[] m) {
         this.mapa = m;
     }
@@ -112,23 +114,27 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     public abstract void nacitajPostavy();
     public abstract void pohybPostavami();
     public abstract void spracujUtok();
-    public abstract void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela);
-    public abstract void kresliHUD(Graphics g);
-    public abstract void skontrolujKoniec();
+    public abstract void spracujKoliziu(Iterator<Strela> it, Strela strela);
+    public abstract void hud(Graphics g);
+    public abstract void koniec();
     public abstract void restart();
-
+    public abstract void skontrolujPickupy();
     public abstract void kresliPostavy(Graphics g);
 
 
+    public abstract void pridajPickupy();
 
+    /**
+     * Herná slučka — každý tik aktualizuje pohyb, strely, útoky a vykreslenie.
+     */
     @Override
-    public final void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent e) {
         if (!this.stopnutaHra) {
             this.pohybPostavami();
             this.pohybStriel();
             this.spracujUtok();
-            this.skontrolujStenoveKolizie();
-            this.skontrolujKoniec();
+            this.vypniStrely();
+            this.koniec();
             this.skontrolujPickupy();
         }
         this.repaint();
@@ -137,25 +143,34 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         }
     }
 
+    /**
+     * Načíta steny z mapy a uloží ich do zoznamu stien.
+     */
     public void nacitajSteny() {
         this.steny.clear();
         for (int r = 0; r < RIADKY; r++) {
             for (int s = 0; s < STLPCE; s++) {
                 if (this.mapa[r].charAt(s) == 'X') {
-                    this.steny.add(new Stvorec(this.obrazokSteny,
-                            s * VELKOST_S, r * VELKOST_S, VELKOST_S, VELKOST_S));
+                    this.steny.add(new Stvorec(this.obrazokSteny, s * VELKOST_S, r * VELKOST_S, VELKOST_S, VELKOST_S));
                 }
             }
         }
     }
 
+
+    /**
+     * Posunie všetky strely o ich rýchlosť.
+     */
     public void pohybStriel() {
         for (Strela s : this.strely) {
             s.pohyb();
         }
     }
 
-    public void skontrolujStenoveKolizie() {
+    /**
+     * Odstráni strely, ktoré zasiahli stenu, a volá spracovanie kolízií so postavami.
+     */
+    public void vypniStrely() {
         Iterator<Strela> it = this.strely.iterator();
         while (it.hasNext()) {
             Strela strela = it.next();
@@ -170,24 +185,50 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
                 it.remove();
                 continue;
             }
-            this.skontrolujPostaveKolizie(it, strela);
+            this.spracujKoliziu(it, strela);
         }
     }
 
-    public void skontrolujPickupy() { /* override v podtriedach */ }
+    /**
+     * Presunie herný objekt v danom smere s kontrolou kolízie so stenami.
+     */
+    public void pohybVSmere(HernyObjekt obj, int x, int y) {
+        int smerX = Integer.signum(x);
+        for (int i = 0; i < Math.abs(x); i++) {
+            obj.setX(obj.getX() + smerX);
+            boolean hit = false;
+            for (HernyObjekt stena : this.getSteny()) {
+                if (obj.koliduje(stena)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) {
+                obj.setX(obj.getX() - smerX);
+                break;
+            }
+        }
 
-    public void pridajPickupy() {
-        this.pickupy.clear();
-        int[][] pos = {{3, 5}, {15, 18}, {8, 12}, {12, 3}};
-        for (int i = 0; i < pos.length; i++) {
-            int x = pos[i][0] * VELKOST_S;
-            int y = pos[i][1] * VELKOST_S;
-            this.pickupy.add(i % 2 == 0
-                    ? new Heal(null, x, y, VELKOST_S)
-                    : new Speed(null, x, y, VELKOST_S, 5));
+        int smerY = Integer.signum(y);
+        for (int i = 0; i < Math.abs(y); i++) {
+            obj.setY(obj.getY() + smerY);
+            boolean hit = false;
+            for (HernyObjekt stena : this.getSteny()) {
+                if (obj.koliduje(stena)) {
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) {
+                obj.setY(obj.getY() - smerY);
+                break;
+            }
         }
     }
 
+    /**
+     * Vykreslí steny, pickupy, strely, HUD a postavy.
+     */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -202,7 +243,7 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
         for (Strela s : this.strely) {
             s.paint(g);
         }
-        this.kresliHUD(g);
+        this.hud(g);
         this.kresliPostavy(g);
     }
 

@@ -2,82 +2,137 @@ package players;
 
 import core.HernyObjekt;
 import weapons.Strela;
+import weapons.TypStrely;
 
-import javax.swing.ImageIcon;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.util.List;
+import java.util.ArrayList;
 
-public class Bot extends Hrac implements Postava {
-    private HernyObjekt ciel;
-    private ImageIcon ikonka;
+/**
+ * Trieda Bot - predstavuje AI nepriateľa
+ *
+ * @author Samuel Ďuriš
+ * @version V3
+ */
+public class Bot extends Ai implements Postava {
 
-    public Bot(Image obrazok, int x, int y, int velkost, boolean[] stlaceneKlavesy) {
-        super(obrazok, x, y, velkost, 'L', -1, -1, -1, -1, -1, stlaceneKlavesy, 1);
+    private static final int RYCHLOST_START = 3;
+    private static final int MAX_HP = 100;
+
+    private int hp = MAX_HP;
+    private char smerObr = 'L';
+    private int cooldown = 0;
+
+    private boolean vystrelenaStrela = false;
+
+    private Hrac ciel;
+
+    public Bot(Image obrazok, int x, int y, int velkost) {
+        super(obrazok, x, y, velkost);
     }
 
-    public void sledujCiel(HernyObjekt ciel) {
+    public void sledujCiel(Hrac ciel) {
         this.ciel = ciel;
-    }
-
-    public ImageIcon getIkonka() {
-        return this.ikonka;
-    }
-
-    public void setIkonka(ImageIcon ikonka) {
-        this.ikonka = ikonka;
-        if (ikonka != null) {
-            this.setObrazok(ikonka.getImage());
-        }
     }
 
     @Override
     public void pohybSa() {
-        if (this.ciel == null) {
-            return;
-        }
-        this.setPohybX(0);
-        this.setPohybY(0);
-
-        int dx = this.ciel.getX() - this.getX();
-        int dy = this.ciel.getY() - this.getY();
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-            this.setPohybX(dx > 0 ? this.getRychlost() : -this.getRychlost());
-            this.setSmerObr(dx > 0 ? 'R' : 'L');
+        int x = this.ciel.getX() - this.getX();
+        int y = this.ciel.getY() - this.getY();
+        if (x >= 0) {
+            this.smerObr = 'R';
         } else {
-            this.setPohybY(dy > 0 ? this.getRychlost() : -this.getRychlost());
+            this.smerObr = 'L';
         }
 
-        this.decrementCooldown();
+        int botX = (this.getX() + this.getSirka() / 2) / this.getVelkostS();
+        int botY = (this.getY() + this.getVyska() / 2) / this.getVelkostS();
+        int cielX = (this.ciel.getX() + this.ciel.getSirka() / 2) / this.getVelkostS();
+        int cielY = (this.ciel.getY() + this.ciel.getVyska() / 2) / this.getVelkostS();
 
-        if (Math.abs(dx) < 200 && Math.abs(dy) < 200) {
+        int[] smer = this.pathfinding(botX, botY, cielX, cielY, this.ciel.getPohybX(), this.ciel.getPohybY());
+
+        super.korekcia(smer, botX, botY, RYCHLOST_START);
+
+        if (this.cooldown > 0) {
+            this.cooldown--;
+        }
+        if (Math.abs(x) < 200 && Math.abs(y) < 200) {
             this.vystrel();
         }
     }
 
     @Override
-    public void utoc(int cielX, int cielY, List<Strela> strely) {
-        if (!this.mozeUtocit() || !this.getVystrelena()) {
-            return;
-        }
-        double dx = cielX - this.getX();
-        double dy = cielY - this.getY();
-        double d  = Math.sqrt(dx * dx + dy * dy);
-        if (d == 0) {
-            return;
+    public void utoc(int cielX, int cielY, ArrayList<Strela> strely) {
+        double speedX;
+        if (this.smerObr == 'L') {
+            speedX = -8.0;
+        } else {
+            speedX = 8.0;
         }
         strely.add(new Strela(
                 this.getX() + this.getSirka() / 2,
                 this.getY() + this.getVyska() / 2,
-                (dx / d) * 8, (dy / d) * 8,
-                1, Strela.TypStrely.NORMALNA));
-        this.resetVystrelena();
-        this.setCooldown(20);
+                speedX, 0.0, 1, TypStrely.NORMALNA));
+        this.vystrelenaStrela = false;
+        this.cooldown = 30;
     }
 
     @Override
+    public void dostanZasah(int p) {
+        this.hp = Math.max(0, this.hp - p);
+    }
+    @Override
+    public void vystrel() {
+        this.vystrelenaStrela = true;
+    }
+    @Override
+    public boolean mozeUtocit() {
+        return this.cooldown <= 0;
+    }
+    @Override
+    public void resetCooldown() {
+        this.cooldown = 0;
+    }
+    @Override
+    public int getHP() {
+        return this.hp;
+    }
+    @Override
+    public int getMaxHP() {
+        return MAX_HP;
+    }
+    @Override
+    public void setHP(int hp) {
+        this.hp = Math.clamp(hp, 0, MAX_HP);
+    }
+    @Override
+    public boolean jeZiva() {
+        return this.hp > 0;
+    }
+
+    @Override
+    public int getX() {
+        return super.getX();
+    }
+    @Override
+    public int getY() {
+        return super.getY();
+    }
+    @Override
+    public char getSmerObr() {
+        return this.smerObr;
+    }
+    @Override
+    public void pohyb() {
+
+    }
+    @Override
     public void paint(Graphics g) {
 
+    }
+    @Override
+    public boolean dotyk(HernyObjekt o) {
+        return this.koliduje(o);
     }
 }

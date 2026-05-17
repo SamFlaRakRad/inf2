@@ -19,6 +19,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Objects;
 
+/**
+ * Trieda Multiplayer - hernný režim pre dvoch hráčov hrajúcich proti sebe.
+ * Každý hráč ovláda svoju postavu a pokúša sa poraziť druhého hráča.
+ * Hra obsahuje náboje na mape, powerupy a systém cooldownu pre strelbou.
+ * Hra skončí, keď jeden z hráčov stratí všetko zdravie alebo sa skončia náboje a strely.
+ *
+ * @author Samuel Ďuriš
+ * @version V3
+ */
 public class Multiplayer extends RezimHry {
     private Hrac hrac1;
     private Hrac hrac2;
@@ -47,6 +56,7 @@ public class Multiplayer extends RezimHry {
     private boolean vyhralH2 = false;
     private int pocetPickupov;
     private int speedBoostTrvanie;
+    private int healKoef;
 
 
     public Multiplayer(Obtiaznost obtiaznost) {
@@ -56,18 +66,21 @@ public class Multiplayer extends RezimHry {
                 this.zacinajuceNaboje = 20;
                 this.pocetPickupov = 4;
                 this.speedBoostTrvanie = 300;
+                this.healKoef = 50;
                 break;
 
             case STREDNA:
                 this.zacinajuceNaboje = 10;
                 this.pocetPickupov = 2;
                 this.speedBoostTrvanie = 150;
+                this.healKoef = 25;
                 break;
 
             case TAZKA:
                 this.zacinajuceNaboje =  5;
                 this.pocetPickupov = 1;
                 this.speedBoostTrvanie =  75;
+                this.healKoef = 10;
                 break;
 
             default:
@@ -78,6 +91,7 @@ public class Multiplayer extends RezimHry {
         this.hrac1HP = this.hrac1.getHP();
         this.hrac2HP = this.hrac2.getHP();
         this.velkostS = super.getVelkostS();
+        this.pridajPickupy();
     }
 
     @Override
@@ -102,15 +116,15 @@ public class Multiplayer extends RezimHry {
                 if (ch == 'H') {
                     // Hráč 1
                     this.hrac1 = new Hrac(this.hrac1Vpravo, x, y, super.getVelkostS(), 'R',
-                            KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D,
-                            KeyEvent.VK_SPACE, this.getStlaceneKlavesy(), 0);
+                                            KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_D,
+                                            KeyEvent.VK_SPACE, this.getStlaceneKlavesy(), 0);
                     this.hraci.add(this.hrac1);
                 }
                 if (ch == 'P') {
                     // Hráč 2
                     this.hrac2 = new Hrac(this.hrac2Vlavo, x, y, super.getVelkostS(), 'L',
-                            KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT,
-                            KeyEvent.VK_ENTER, this.getStlaceneKlavesy(), 1);
+                                            KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT,
+                                            KeyEvent.VK_ENTER, this.getStlaceneKlavesy(), 1);
                     this.hraci.add(this.hrac2);
                 }
                 if (ch == 'A') {
@@ -122,11 +136,9 @@ public class Multiplayer extends RezimHry {
 
     @Override
     public void kresliPostavy(Graphics g) {
-        // draw ammo pickups on map
         for (Stvorec naboj : this.nabojeNaMape) {
             naboj.paint(g);
         }
-        // draw both players
         for (Hrac h : this.hraci) {
             h.paint(g);
         }
@@ -150,13 +162,13 @@ public class Multiplayer extends RezimHry {
             if (this.getMapa()[row].charAt(col) != '.') {
                 continue;
             }
-            int px = col * super.getVelkostS();
-            int py = row * super.getVelkostS();
+            int x = col * super.getVelkostS();
+            int y = row * super.getVelkostS();
 
             if (umiestnene % 2 == 0) {
-                this.getPickupy().add(new Heal(this.healObr, px, py, super.getVelkostS()));
+                this.getPickupy().add(new Heal(this.healObr, x, y, super.getVelkostS(), this.healKoef));
             } else {
-                this.getPickupy().add(new Speed(this.speedObr, px, py,
+                this.getPickupy().add(new Speed(this.speedObr, x, y,
                         super.getVelkostS(), this.speedBoostTrvanie));
             }
             umiestnene++;
@@ -167,20 +179,35 @@ public class Multiplayer extends RezimHry {
     public void pohybPostavami() {
         for (Hrac h : this.hraci) {
             h.pohybSa();
-            Image vpravo = (h == this.hrac1) ? this.hrac1Vpravo : this.hrac2Vpravo;
-            Image vlavo  = (h == this.hrac1) ? this.hrac1Vlavo  : this.hrac2Vlavo;
-            h.setObrazok(h.getSmerObr() == 'L' ? vlavo : vpravo);
-            this.aplikujPohybSKolizou(h);
+            Image vpravo;
+            Image vlavo;
+            if (h == this.hrac1) {
+                vpravo = this.hrac1Vpravo;
+                vlavo  = this.hrac1Vlavo;
+            } else {
+                vpravo = this.hrac2Vpravo;
+                vlavo  = this.hrac2Vlavo;
+            }
+            if (h.getSmerObr() == 'L') {
+                h.setObrazok(vlavo);
+            } else {
+                h.setObrazok(vpravo);
+            }
+            super.pohybVSmere(h, h.getPohybX(), h.getPohybY());
         }
     }
-
 
 
     @Override
     public void spracujUtok() {
         for (int i = 0; i < this.hraci.size(); i++) {
-            Hrac h       = this.hraci.get(i);
-            int zasobnik = (h == this.hrac1) ? this.zasobnikH1 : this.zasobnikH2;
+            Hrac h = this.hraci.get(i);
+            int zasobnik;
+            if (h == this.hrac1) {
+                zasobnik = this.zasobnikH1;
+            } else {
+                zasobnik = this.zasobnikH2;
+            }
             if (zasobnik <= 0 || !h.getVystrelena()) {
                 continue;
             }
@@ -199,11 +226,11 @@ public class Multiplayer extends RezimHry {
     }
 
     @Override
-    public void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela) {
+    public void spracujKoliziu(Iterator<Strela> it, Strela strela) {
         for (int i = 0; i < this.hraci.size(); i++) {
             Hrac h = this.hraci.get(i);
             if (strela.getStrana() != i && strela.koliduje(h)) {
-                h.dostaZasah(25);   // 4 zásahy = koniec
+                h.dostanZasah(25);
                 if (!h.jeZiva()) {
                     if (i == 0) {
                         this.vyhralH2 = true;
@@ -219,7 +246,7 @@ public class Multiplayer extends RezimHry {
     }
 
     @Override
-    public void skontrolujKoniec() {
+    public void koniec() {
         if (this.zasobnikH1 == 0 && this.zasobnikH2 == 0
                 && this.getStrely().isEmpty() && this.nabojeNaMape.isEmpty()) {
             this.remiza = true;
@@ -255,11 +282,17 @@ public class Multiplayer extends RezimHry {
         }
         for (Zberatelny z : this.getPickupy()) {
             if (!z.jeZobrany() && this.hrac1.koliduje((HernyObjekt)z)) {
+                if (z instanceof Heal && this.hrac1.getHP() == 100) {
+                    continue;
+                }
                 z.pouzi(this.hrac1);
             }
         }
         for (Zberatelny z : this.getPickupy()) {
             if (!z.jeZobrany() && this.hrac2.koliduje((HernyObjekt)z)) {
+                if (z instanceof Heal && this.hrac2.getHP() == 100) {
+                    continue;
+                }
                 z.pouzi(this.hrac2);
             }
         }
@@ -268,7 +301,7 @@ public class Multiplayer extends RezimHry {
     }
 
     @Override
-    public void kresliHUD(Graphics g) {
+    public void hud(Graphics g) {
         g.setColor(Color.RED);
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.drawString("P1 ammo: " + this.zasobnikH1, 10, 670);
@@ -277,17 +310,22 @@ public class Multiplayer extends RezimHry {
         g.drawString("HP: " + this.hrac2.getHP(), this.getWidth() - 90, 670);
 
         if (this.isStopnutaHra()) {
-            String msg = this.remiza   ? "REMÍZA!"
-                    : this.vyhralH1 ? "Hráč 1 vyhral!"
-                      :                 "Hráč 2 vyhral!";
-            g.setFont(new Font("Arial", Font.BOLD, 36));
+            String text;
+            if (this.remiza) {
+                text = "REMÍZA!";
+            } else if (this.vyhralH1) {
+                text = "Hráč 1 vyhral!";
+            } else {
+                text = "Hráč 2 vyhral!";
+            }
+            g.setFont(new Font("Arial", Font.BOLD, 40));
             FontMetrics fm = g.getFontMetrics();
-            int x = (this.getWidth()  - fm.stringWidth(msg)) / 2;
+            int x = (this.getWidth()  - fm.stringWidth(text)) / 2;
             int y = (this.getHeight() + fm.getAscent())       / 2;
             g.setColor(Color.RED);
-            g.drawString(msg, x, y);
-            g.setFont(new Font("Arial", Font.PLAIN, 16));
-            g.drawString("ESC = reštart", x + 20, y + 30);
+            g.drawString(text, x, y);
+            g.setFont(new Font("Arial", Font.PLAIN, 30));
+            g.drawString("Stlac ESC pre restart", x + 20, y + 30);
         }
     }
 
@@ -309,26 +347,13 @@ public class Multiplayer extends RezimHry {
         this.getStrely().clear();
         this.nacitajPostavy();
         this.pridajPickupy();
-        this.zasobnikH1  = this.zacinajuceNaboje;
-        this.zasobnikH2  = this.zacinajuceNaboje;
-        this.remiza      = false;
-        this.vyhralH1    = false;
-        this.vyhralH2    = false;
+        this.zasobnikH1 = this.zacinajuceNaboje;
+        this.zasobnikH2 = this.zacinajuceNaboje;
+        this.remiza = false;
+        this.vyhralH1 = false;
+        this.vyhralH2 = false;
         this.setStopnutaHra(false);
         this.startGameLoop();
     }
 
-    private void aplikujPohybSKolizou(Hrac h) {
-        int nx = h.getX() + h.getPohybX();
-        int ny = h.getY() + h.getPohybY();
-        h.setX(nx);
-        h.setY(ny);
-        for (HernyObjekt stena : this.getSteny()) {
-            if (h.koliduje(stena)) {
-                h.setX(nx - h.getPohybX());
-                h.setY(ny - h.getPohybY());
-                break;
-            }
-        }
-    }
 }

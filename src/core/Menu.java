@@ -10,10 +10,9 @@ import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 /**
- * Trieda Menu ktorá pri spustení aplikacie vytvorí GUI kde si hráči vyberú jednu z ponukaných obtiažností.
- * 
- * @author (Samuel Ďuriš) 
- * @version (V3)
+ * Trieda Menu - vytvorí GUI menu na začiatku aplikácie.
+ * @author Samuel Ďuriš
+ * @version V3
  */
 public class Menu extends JFrame {
     private Obtiaznost vybrata;
@@ -69,6 +68,9 @@ public class Menu extends JFrame {
     }
 
 
+    /**
+     * Zobrazí panel pre výber obtiažnosti hry.
+     */
     public void vyberObtiaznosti() {
         JPanel obtaiaznostPanel = new JPanel(new BorderLayout(10, 10));
         JLabel nadpis = new JLabel("Vyberte obtiažnosť hry", JLabel.CENTER);
@@ -120,6 +122,9 @@ public class Menu extends JFrame {
         this.setVisible(true);
     }
 
+    /**
+     * Zobrazí panel pre výber typu nepriateľa (len pre Singleplayer).
+     */
     public void vyberEnemaka() {
         JPanel vyberEnemaka = new JPanel(new BorderLayout(10, 10));
         JLabel enemyNadpis = new JLabel("Vyberte nepriateľa", JLabel.CENTER);
@@ -158,6 +163,9 @@ public class Menu extends JFrame {
 
     }
 
+    /**
+     * Spustí hernú aplikáciu s vybratými parametrami.
+     */
     private void vyberObtaznost(Obtiaznost obtaznost, TypHry typ, TypEnemaka typEnemaka) {
         this.vybrata = obtaznost;
         this.typ = typ;
@@ -166,22 +174,37 @@ public class Menu extends JFrame {
         new Platno(this.vybrata, this.typ, this.enemak);
     }
 
+    /**
+     * Getter pre vybranú obtiažnosť.
+     */
     public Obtiaznost getVybrataObtaznost() {
         return this.vybrata;
     }
 
+    /**
+     * Getter pre vybratý typ hry.
+     */
     public TypHry getTyp() {
         return this.typ;
     }
 
+    /**
+     * Setter pre typ hry.
+     */
     public void setTyp(TypHry typ) {
         this.typ = typ;
     }
 
+    /**
+     * Setter pre typ nepriateľa.
+     */
     public void setEnemak(TypEnemaka enemak) {
         this.enemak = enemak;
     }
 
+    /**
+     * Getter pre typ nepriateľa.
+     */
     public TypEnemaka getEnemak() {
         return this.enemak;
     }

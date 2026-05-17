@@ -5,17 +5,35 @@ import players.Postava;
 import java.awt.Graphics;
 import java.awt.Image;
 
+/**
+ * Trieda Heal - powerup, ktorý zvyšuje zdravie postavy.
+ *
+ * @author Samuel Ďuriš
+ * @version V3
+ */
 public class Heal extends PowerUp {
-    public Heal(Image obrazok, int x, int y, int velkost) {
+    private int healKoef;
+
+    /**
+     * Konštruktor - inicializuje Heal powerup.
+     */
+    public Heal(Image obrazok, int x, int y, int velkost, int healKoef) {
         super(obrazok, x, y, velkost);
+        this.healKoef = healKoef;
     }
 
+    /**
+     * Aplikuje efekt healu - zvýši zdravie postavy.
+     */
     @Override
     public void pouzi(Postava postava) {
-        postava.setHP(postava.getHP() + 1);
+        postava.setHP(postava.getHP() + this.healKoef);
         this.oznacZobrany();
     }
 
+    /**
+     * Vykreslí heal powerup na canvas.
+     */
     @Override
     public void paint(Graphics g) {
         if (this.getObrazok() != null) {

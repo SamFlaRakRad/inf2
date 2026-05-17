@@ -4,15 +4,30 @@ import players.Boss;
 import players.Bot;
 import players.Hrac;
 import players.Postava;
+import players.Ai;
+import powerUps.Heal;
+import powerUps.Speed;
 import powerUps.Zberatelny;
 import weapons.Strela;
 
 import javax.swing.ImageIcon;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.KeyEvent;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Random;
 
+/**
+ * Herný režim Singleplayer - hra proti AI nepriateľovi (Bot alebo Boss).
+ * Hráč sa pohybuje a strieľa na AI, ktorá používa pathfinding na sledovanie hráča.
+ *
+ * @author Samuel Ďuriš
+ * @version V3
+ */
 public class Singleplayer extends RezimHry {
     private Hrac hrac;
     private Postava protivnik;
@@ -20,42 +35,78 @@ public class Singleplayer extends RezimHry {
 
     private int zacinajuceNaboje;
     private int zasobnikHraca;
+    private int poskodenieHraca;
+    private int poskodenieProtivnika;
 
     private Image hrac1Vpravo;
     private Image hrac1Vlavo;
+    private Image botVpravo;
+    private Image botVlavo;
+    private Image bossVpravo;
+    private Image bossVlavo;
+    private Image healObr;
+    private Image speedObr;
 
-    private boolean hracVyhral      = false;
+    private boolean hracVyhral = false;
     private boolean protivnikVyhral = false;
+
+    private int pocetPickupov;
+    private int speedBoostTrvanie;
+    private int healKoef;
 
     public Singleplayer(Obtiaznost obtiaznost, TypEnemaka typEnemaka) {
         super(obtiaznost);
         switch (obtiaznost) {
-            case LAHKA:  this.zacinajuceNaboje = 20; break;
-            case STREDNA: this.zacinajuceNaboje = 10; break;
-            case TAZKA:  this.zacinajuceNaboje =  5; break;
-            default:     this.zacinajuceNaboje = 100;
+            case LAHKA:
+                this.zacinajuceNaboje = 20;
+                this.pocetPickupov = 4;
+                this.speedBoostTrvanie = 300;
+                this.healKoef = 50;
+                this.poskodenieHraca = 25;
+                this.poskodenieProtivnika = 5;
+                break;
+            case STREDNA:
+                this.zacinajuceNaboje = 10;
+                this.pocetPickupov = 2;
+                this.speedBoostTrvanie = 150;
+                this.healKoef = 25;
+                this.poskodenieHraca = 10;
+                this.poskodenieProtivnika = 10;
+                break;
+            case TAZKA:
+                this.zacinajuceNaboje =  5;
+                this.pocetPickupov = 1;
+                this.speedBoostTrvanie =  75;
+                this.healKoef = 10;
+                this.poskodenieHraca = 5;
+                this.poskodenieProtivnika = 25;
+                break;
+            default:
+                this.zacinajuceNaboje = 100;
         }
-        this.jeBoss        = (typEnemaka == TypEnemaka.BOSS);
+        this.jeBoss = (typEnemaka == TypEnemaka.BOSS);
         this.zasobnikHraca = this.zacinajuceNaboje;
-        // druhé volanie kvôli tomu, že super() zavolal nacitajPostavy()
-        // skôr ako jeBoss a zasobnikHraca boli nastavené
         this.nacitajPostavy();
+        this.pridajPickupy();
     }
 
     @Override
     public void nacitajPostavy() {
-        this.hrac1Vpravo = new ImageIcon(Objects.requireNonNull(
-                this.getClass().getResource("/images/hrac1Vpravo.png"))).getImage();
-        this.hrac1Vlavo  = new ImageIcon(Objects.requireNonNull(
-                this.getClass().getResource("/images/hrac1Vlavo.png"))).getImage();
-        Image hrac2Img   = new ImageIcon(Objects.requireNonNull(
-                this.getClass().getResource("/images/hrac2Vlavo.png"))).getImage();
+        this.hrac1Vpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vpravo.png"))).getImage();
+        this.hrac1Vlavo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/hrac1Vlavo.png"))).getImage();
+        this.botVlavo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/botVlavo.png"))).getImage();
+        this.botVpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/botVpravo.png"))).getImage();
+        this.bossVlavo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/bossVlavo.png"))).getImage();
+        this.bossVpravo = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/bossVpravo.png"))).getImage();
+        this.healObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/heal.png"))).getImage();
+        this.speedObr = new ImageIcon(Objects.requireNonNull(this.getClass().getResource("/images/speed.png"))).getImage();
+
 
         for (int r = 0; r < super.getRIADKY(); r++) {
             for (int s = 0; s < super.getSTLPCE(); s++) {
                 char ch = this.getMapa()[r].charAt(s);
-                int x   = s * super.getVelkostS();
-                int y   = r * super.getVelkostS();
+                int x = s * super.getVelkostS();
+                int y = r * super.getVelkostS();
 
                 if (ch == 'H') {
                     this.hrac = new Hrac(this.hrac1Vpravo, x, y, super.getVelkostS(), 'R',
@@ -64,9 +115,9 @@ public class Singleplayer extends RezimHry {
                 }
                 if (ch == 'P') {
                     if (this.jeBoss) {
-                        this.protivnik = new Boss(null, x, y, super.getVelkostS() * 2);
+                        this.protivnik = new Boss(this.bossVlavo, x, y, super.getVelkostS());
                     } else {
-                        Bot bot = new Bot(hrac2Img, x, y, super.getVelkostS(), this.getStlaceneKlavesy());
+                        Bot bot = new Bot(this.botVlavo, x, y, super.getVelkostS());
                         this.protivnik = bot;
                     }
                 }
@@ -75,38 +126,48 @@ public class Singleplayer extends RezimHry {
 
         if (this.hrac != null && this.protivnik != null) {
             if (this.protivnik instanceof Boss) {
-                ((Boss) this.protivnik).setCiel(this.hrac);
+                ((Boss)this.protivnik).setCiel(this.hrac);
             } else if (this.protivnik instanceof Bot) {
-                ((Bot) this.protivnik).sledujCiel(this.hrac);
+                ((Bot)this.protivnik).sledujCiel(this.hrac);
             }
+        }
+
+        if (this.protivnik != null) {
+            ((Ai)this.protivnik).nastavMapu(this.getMapa(), super.getVelkostS());
         }
     }
 
     @Override
     public void pohybPostavami() {
-        if (this.hrac == null || this.protivnik == null) {
-            return;
-        }
         this.hrac.pohybSa();
-        this.hrac.setObrazok(this.hrac.getSmerObr() == 'L' ? this.hrac1Vlavo : this.hrac1Vpravo);
-        this.aplikujPohybSKolizou(this.hrac, this.hrac.getPohybX(), this.hrac.getPohybY());
+        if (this.hrac.getSmerObr() == 'L') {
+            this.hrac.setObrazok(this.hrac1Vlavo);
+        } else {
+            this.hrac.setObrazok(this.hrac1Vpravo);
+        }
+        super.pohybVSmere(this.hrac, this.hrac.getPohybX(), this.hrac.getPohybY());
 
         this.protivnik.pohybSa();
-        this.aplikujPohybSKolizou((HernyObjekt) this.protivnik,
-                this.protivnik.getPohybX(), this.protivnik.getPohybY());
-
-        for (Strela s : this.getStrely()) {
-            if (s.getTyp() == Strela.TypStrely.RAKETA) {
-                s.aktualizujCiel(this.hrac.getX(), this.hrac.getY());
+        if (this.protivnik instanceof Boss) {
+            if (this.protivnik.getSmerObr() == 'L') {
+                ((HernyObjekt)this.protivnik).setObrazok(this.bossVlavo);
+            } else {
+                ((HernyObjekt)this.protivnik).setObrazok(this.bossVpravo);
+            }
+        } else if (this.protivnik instanceof Bot) {
+            if (this.protivnik.getSmerObr() == 'L') {
+                ((HernyObjekt)this.protivnik).setObrazok(this.botVlavo);
+            } else {
+                ((HernyObjekt)this.protivnik).setObrazok(this.botVpravo);
             }
         }
+        super.pohybVSmere((HernyObjekt)this.protivnik, this.protivnik.getPohybX(), this.protivnik.getPohybY());
+
+
     }
 
     @Override
     public void spracujUtok() {
-        if (this.hrac == null || this.protivnik == null) {
-            return;
-        }
         if (this.hrac.getVystrelena() && this.zasobnikHraca > 0) {
             int pred = this.getStrely().size();
             this.hrac.utoc(this.protivnik.getX(), this.protivnik.getY(), this.getStrely());
@@ -120,19 +181,19 @@ public class Singleplayer extends RezimHry {
     }
 
     @Override
-    public void skontrolujPostaveKolizie(Iterator<Strela> it, Strela strela) {
-        HernyObjekt protObj = (HernyObjekt) this.protivnik;
+    public void spracujKoliziu(Iterator<Strela> it, Strela strela) {
+        HernyObjekt protObj = (HernyObjekt)this.protivnik;
         if (strela.getStrana() == 0 && strela.koliduje(protObj)) {
-            this.protivnik.dostaZasah(1);
+            this.protivnik.dostanZasah(this.poskodenieHraca);
             it.remove();
         } else if (strela.getStrana() == 1 && strela.koliduje(this.hrac)) {
-            this.hrac.dostaZasah(20);
+            this.hrac.dostanZasah(this.poskodenieProtivnika);
             it.remove();
         }
     }
 
     @Override
-    public void skontrolujKoniec() {
+    public void koniec() {
         if (this.protivnik != null && !this.protivnik.jeZiva()) {
             this.hracVyhral = true;
             this.setStopnutaHra(true);
@@ -145,11 +206,11 @@ public class Singleplayer extends RezimHry {
 
     @Override
     public void skontrolujPickupy() {
-        if (this.hrac == null) {
-            return;
-        }
         for (Zberatelny z : this.getPickupy()) {
-            if (!z.jeZobrany() && this.hrac.koliduje((HernyObjekt) z)) {
+            if (!z.jeZobrany() && this.hrac.koliduje((HernyObjekt)z)) {
+                if (z instanceof Heal && this.hrac.getHP() == 100) {
+                    continue;
+                }
                 z.pouzi(this.hrac);
             }
         }
@@ -158,52 +219,75 @@ public class Singleplayer extends RezimHry {
 
     @Override
     public void kresliPostavy(Graphics g) {
-        // Hráč
-        if (this.hrac != null) {
-            this.hrac.paint(g);
+        this.hrac.paint(g);
+        HernyObjekt protObj = (HernyObjekt)this.protivnik;
+        Image img = protObj.getObrazok();
+        g.drawImage(img, protObj.getX(), protObj.getY(), protObj.getSirka(), protObj.getVyska(), null);
+
+    }
+
+    @Override
+    public void pridajPickupy() {
+        this.getPickupy().clear();
+        if (this.pocetPickupov <= 0) {
+            return;
         }
-        // Protivník – použije obrazok nastavený cez setObrazok() / setIkonka()
-        if (this.protivnik != null) {
-            HernyObjekt protObj = (HernyObjekt) this.protivnik;
-            Image img = protObj.getObrazok();
-            if (img != null) {
-                g.drawImage(img, protObj.getX(), protObj.getY(),
-                        protObj.getSirka(), protObj.getVyska(), null);
+        Random rand = new Random();
+        int counter = 0;
+        int maxPokusov = 500;
+        int pokus = 0;
+
+        while (counter < this.pocetPickupov && pokus < maxPokusov) {
+            pokus++;
+            int row = rand.nextInt(super.getRIADKY());
+            int col = rand.nextInt(super.getSTLPCE());
+            if (this.getMapa()[row].charAt(col) != '.') {
+                continue;
             }
+            int x = col * super.getVelkostS();
+            int y = row * super.getVelkostS();
+
+            if (counter % 2 == 0) {
+                this.getPickupy().add(new Heal(this.healObr, x, y, super.getVelkostS(), this.healKoef));
+            } else {
+                this.getPickupy().add(new Speed(this.speedObr, x, y,
+                        super.getVelkostS(), this.speedBoostTrvanie));
+            }
+            counter++;
         }
     }
 
     @Override
-    public void kresliHUD(Graphics g) {
+    public void hud(Graphics g) {
         g.setColor(Color.RED);
-        g.setFont(new Font("Arial", Font.BOLD, 16));
-        g.drawString("Náboje: " + this.zasobnikHraca, 10, 20);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("ammo: " + this.zasobnikHraca, 10, 670);
+        g.drawString("HP: " + this.hrac.getHP(), 130, 670);
 
-        if (this.hrac != null) {
-            g.drawString("HP: " + this.hrac.getHP(), 10, 40);
+        String text;
+        if (this.jeBoss) {
+            text = "Boss HP: ";
+        } else {
+            text = "Bot HP: ";
         }
-        if (this.protivnik != null) {
-            String label = this.jeBoss ? "Boss HP: " : "Bot HP: ";
-            g.drawString(label + this.protivnik.getHP() + "/" + this.protivnik.getMaxHP(),
-                    this.getWidth() - 160, 20);
-        }
+        g.drawString(text + this.protivnik.getHP(), this.getWidth() - 160, 670);
 
         if (this.isStopnutaHra()) {
             String msg;
             if (this.hracVyhral) {
-                msg = "Vyhral si!";
+                msg = "Vyhral si";
             } else {
-                msg = "Prehral si!";
+                msg = "Prehral si";
             }
             g.setFont(new Font("Arial", Font.BOLD, 40));
             FontMetrics fm = g.getFontMetrics();
             int x = (this.getWidth()  - fm.stringWidth(msg)) / 2;
             int y = (this.getHeight() + fm.getAscent())       / 2;
-            g.setColor(Color.YELLOW);
+            g.setColor(Color.RED);
             g.drawString(msg, x, y);
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.PLAIN, 18));
-            g.drawString("ESC = reštart", x + 10, y + 36);
+            g.setColor(Color.RED);
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            g.drawString("Stlac ESC pre restart", x + 10, y + 36);
         }
     }
 
@@ -221,23 +305,15 @@ public class Singleplayer extends RezimHry {
         this.nacitajSteny();
         this.getStrely().clear();
         this.nacitajPostavy();
+        ((Ai)this.protivnik).nastavMapu(this.getMapa(), super.getVelkostS());
         this.pridajPickupy();
         this.zasobnikHraca  = this.zacinajuceNaboje;
-        this.hracVyhral     = false;
+        this.hracVyhral = false;
         this.protivnikVyhral = false;
         this.setStopnutaHra(false);
         this.startGameLoop();
+
     }
 
-    private void aplikujPohybSKolizou(HernyObjekt obj, int dx, int dy) {
-        obj.setX(obj.getX() + dx);
-        obj.setY(obj.getY() + dy);
-        for (HernyObjekt stena : this.getSteny()) {
-            if (obj.koliduje(stena)) {
-                obj.setX(obj.getX() - dx);
-                obj.setY(obj.getY() - dy);
-                break;
-            }
-        }
-    }
+
 }
