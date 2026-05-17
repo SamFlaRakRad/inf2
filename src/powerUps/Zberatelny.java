@@ -2,7 +2,7 @@ package powerUps;
 
 import players.Postava;
 
-import java.awt.*;
+import java.awt.Graphics;
 
 /**
  * Interface Zberatelny - definuje rozhranie pre zberateľné objekty v hre.

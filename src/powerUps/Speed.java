@@ -1,6 +1,5 @@
 package powerUps;
 
-import players.Hrac;
 import players.Postava;
 
 import java.awt.Image;

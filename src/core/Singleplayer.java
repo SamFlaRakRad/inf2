@@ -3,7 +3,6 @@ package core;
 import players.Boss;
 import players.Bot;
 import players.Hrac;
-import players.Postava;
 import players.Ai;
 import powerUps.Heal;
 import powerUps.Speed;
