@@ -12,8 +12,6 @@ import java.awt.Color;
  * @version V3
  */
 public class Strela extends HernyObjekt {
-    private int x;
-    private int y;
     private double rychlostX;
     private double rychlostY;
     private static final int VELKOST_STRELY = 8;

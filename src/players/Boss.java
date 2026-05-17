@@ -215,11 +215,9 @@ public class Boss extends Ai {
         return this.hp > 0;
     }
 
-    @Override
     public int getX() {
         return super.getX();
     }
-    @Override
     public int getY() {
         return super.getY();
     }

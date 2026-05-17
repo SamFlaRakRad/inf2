@@ -274,7 +274,7 @@ public class Singleplayer extends RezimHry {
             g.drawString(msg, x, y);
             g.setColor(Color.RED);
             g.setFont(new Font("Arial", Font.BOLD, 30));
-            g.drawString("Stlac ESC pre restart", x + 10, y + 36);
+            g.drawString("Stlac ESC pre restart", x - 50, y + 35);
         }
     }
 
