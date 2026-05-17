@@ -120,8 +120,6 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     public abstract void restart();
     public abstract void skontrolujPickupy();
     public abstract void kresliPostavy(Graphics g);
-
-
     public abstract void pridajPickupy();
 
     /**
@@ -192,35 +190,35 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
     /**
      * Presunie herný objekt v danom smere s kontrolou kolízie so stenami.
      */
-    public void pohybVSmere(HernyObjekt obj, int x, int y) {
+    public void pohybVSmere(HernyObjekt objekt, int x, int y) {
         int smerX = Integer.signum(x);
         for (int i = 0; i < Math.abs(x); i++) {
-            obj.setX(obj.getX() + smerX);
+            objekt.setX(objekt.getX() + smerX);
             boolean hit = false;
             for (HernyObjekt stena : this.getSteny()) {
-                if (obj.koliduje(stena)) {
+                if (objekt.koliduje(stena)) {
                     hit = true;
                     break;
                 }
             }
             if (hit) {
-                obj.setX(obj.getX() - smerX);
+                objekt.setX(objekt.getX() - smerX);
                 break;
             }
         }
 
         int smerY = Integer.signum(y);
         for (int i = 0; i < Math.abs(y); i++) {
-            obj.setY(obj.getY() + smerY);
+            objekt.setY(objekt.getY() + smerY);
             boolean hit = false;
             for (HernyObjekt stena : this.getSteny()) {
-                if (obj.koliduje(stena)) {
+                if (objekt.koliduje(stena)) {
                     hit = true;
                     break;
                 }
             }
             if (hit) {
-                obj.setY(obj.getY() - smerY);
+                objekt.setY(objekt.getY() - smerY);
                 break;
             }
         }
