@@ -122,7 +122,7 @@ public class Hrac extends HernyObjekt implements Postava {
     }
 
     @Override
-    public int  getHP() {
+    public int getHP() {
         return this.hp;
     }
 
@@ -133,12 +133,12 @@ public class Hrac extends HernyObjekt implements Postava {
 
     @Override
     public void setHP(int hp) {
-        this.hp = Math.clamp(hp, 0, 100);
+        this.hp = hp;
     }
 
     @Override
     public void dostanZasah(int p) {
-        this.hp = Math.max(0, this.hp - p);
+        this.hp = this.hp - p;
     }
 
     @Override
@@ -165,7 +165,7 @@ public class Hrac extends HernyObjekt implements Postava {
         return super.getY();
     }
 
-    public void  resetVystrelena() {
+    public void resetVystrelena() {
         this.vystrelenaStrela = false;
     }
 

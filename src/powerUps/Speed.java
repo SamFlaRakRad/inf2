@@ -2,6 +2,7 @@ package powerUps;
 
 import players.Postava;
 
+import java.awt.Graphics;
 import java.awt.Image;
 
 /**
@@ -30,6 +31,13 @@ public class Speed extends PowerUp {
     public void pouzi(Postava postava) {
         postava.activateSpeedBoost(this.trvanie);
         this.oznacZobrany();
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        if (this.getObrazok() != null) {
+            g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
+        }
     }
 
 }

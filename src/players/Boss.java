@@ -198,12 +198,12 @@ public class Boss extends Ai {
 
     @Override
     public void setHP(int hp) {
-        this.hp = Math.clamp(hp, 0, MAX_HP);
+        this.hp = MAX_HP;
     }
 
     @Override
     public void dostanZasah(int p) {
-        this.hp = Math.max(0, this.hp - p);
+        this.hp = this.hp - p;
         if (this.faza == 1 && this.hp <= POLHP) {
             this.faza = 2;
             this.rychlost = 5;

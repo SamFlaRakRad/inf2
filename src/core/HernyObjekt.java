@@ -82,8 +82,8 @@ public abstract class HernyObjekt {
     /**
      * Setter pre obrázok
      */
-    public void setObrazok(Image img) {
-        this.obrazok = img;
+    public void setObrazok(Image obrazok) {
+        this.obrazok = obrazok;
     }
 
     /**

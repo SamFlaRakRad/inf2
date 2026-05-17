@@ -32,7 +32,7 @@ public class Heal extends PowerUp {
     }
 
     /**
-     * Vykreslí heal powerup na canvas.
+     * Vykreslí heal powerup.
      */
     @Override
     public void paint(Graphics g) {

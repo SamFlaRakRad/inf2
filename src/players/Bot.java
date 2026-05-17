@@ -100,7 +100,7 @@ public class Bot extends Ai {
 
     @Override
     public void dostanZasah(int p) {
-        this.hp = Math.max(0, this.hp - p);
+        this.hp = this.hp - p;
     }
     @Override
     public void vystrel() {
@@ -124,7 +124,7 @@ public class Bot extends Ai {
     }
     @Override
     public void setHP(int hp) {
-        this.hp = Math.clamp(hp, 0, MAX_HP);
+        this.hp = MAX_HP;
     }
     @Override
     public boolean jeZiva() {
