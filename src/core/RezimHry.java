@@ -236,9 +236,7 @@ public abstract class RezimHry extends JPanel implements ActionListener, KeyList
             s.paint(g);
         }
         for (Zberatelny  z : this.pickupy) {
-            if (z instanceof HernyObjekt) {
-                ((HernyObjekt)z).paint(g);
-            }
+            z.paint(g);
         }
         for (Strela s : this.strely) {
             s.paint(g);

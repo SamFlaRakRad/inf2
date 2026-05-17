@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * @author Samuel Ďuriš
  * @version V3
  */
-public class Bot extends Ai implements Postava {
+public class Bot extends Ai {
 
     private static final int RYCHLOST_START = 3;
     private static final int MAX_HP = 100;
@@ -123,13 +123,18 @@ public class Bot extends Ai implements Postava {
     public char getSmerObr() {
         return this.smerObr;
     }
+
+    @Override
+    public void activateSpeedBoost(int tiky) {
+    }
+
     @Override
     public void pohyb() {
 
     }
     @Override
     public void paint(Graphics g) {
-
+        g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
     }
     @Override
     public boolean dotyk(HernyObjekt o) {

@@ -25,8 +25,6 @@ public class Strela extends HernyObjekt {
      */
     public Strela(int x, int y, double rychlostX, double rychlostY, int strana, TypStrely typ) {
         super(null, x, y, VELKOST_STRELY, VELKOST_STRELY);
-        this.x = x;
-        this.y = y;
         this.rychlostX = rychlostX;
         this.rychlostY = rychlostY;
         this.strana = strana;
@@ -34,45 +32,12 @@ public class Strela extends HernyObjekt {
     }
 
     /**
-     * Getter pre x-ovú pozíciu strely.
-     */
-    @Override
-    public int getX() {
-        return this.x;
-    }
-
-    /**
-     * Getter pre y-ovú pozíciu strely.
-     */
-    @Override
-    public int getY() {
-        return this.y;
-    }
-
-    /**
-     * Setter pre x-ovú pozíciu strely.
-     */
-    @Override
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    /**
-     * Setter pre y-ovú pozíciu strely.
-     */
-    @Override
-    public void setY(int y) {
-        this.y = y;
-    }
-
-
-    /**
      * Pohyb - aktualizuje pozíciu strely na základe jej rýchlosti.
      */
     @Override
     public void pohyb() {
-        this.x += (int)this.rychlostX;
-        this.y += (int)this.rychlostY;
+        this.setX(this.getX() + (int)this.rychlostX);
+        this.setY(this.getY() + (int)this.rychlostY);
     }
 
     /**
@@ -81,7 +46,7 @@ public class Strela extends HernyObjekt {
     @Override
     public void paint(Graphics g) {
         g.setColor(Color.BLACK);
-        g.fillOval(this.x, this.y, 8, 8);
+        g.fillOval(this.getX(), this.getY(), VELKOST_STRELY, VELKOST_STRELY);
     }
 
     /**

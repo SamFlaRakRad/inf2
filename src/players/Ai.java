@@ -9,7 +9,7 @@ import java.awt.Image;
  * @author Samuel Ďuriš
  * @version V3
  */
-public abstract class Ai extends HernyObjekt {
+public abstract class Ai extends HernyObjekt implements Postava {
 
     private String[] mapa;
     private int pocetR;
@@ -34,6 +34,7 @@ public abstract class Ai extends HernyObjekt {
         this.pocetS = mapa[0].length();
         this.velkostS = velkostS;
     }
+    public abstract void sledujCiel(Hrac ciel);
 
     /**
      * Getter pre mapu.

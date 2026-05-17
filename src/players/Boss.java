@@ -18,7 +18,7 @@ import java.util.Random;
  * @author Samuel Ďuriš
  * @version V3
  */
-public class Boss extends Ai implements Postava {
+public class Boss extends Ai {
 
     private int hp;
     private static final int MAX_HP = 100;
@@ -29,7 +29,7 @@ public class Boss extends Ai implements Postava {
     private static final int POLHP = MAX_HP / 2;
     private int startCooldown = 30;
     private int cooldownNormalny = 30;
-    private int fullAuto = 10;
+    private int fullAuto = 5;
 
     private char smerObr = 'L';
 
@@ -38,7 +38,8 @@ public class Boss extends Ai implements Postava {
         this.hp = MAX_HP;
     }
 
-    public void setCiel(Hrac ciel) {
+    @Override
+    public void sledujCiel(Hrac ciel) {
         this.ciel = ciel;
     }
 
@@ -90,7 +91,6 @@ public class Boss extends Ai implements Postava {
                     break;
                 case 2:
                     this.fullAuto(strely);
-                    this.resetCooldown();
                     break;
                 case 3:
                     this.snipa(strely);
@@ -209,6 +209,12 @@ public class Boss extends Ai implements Postava {
     public char getSmerObr() {
         return this.smerObr;
     }
+
+    @Override
+    public void activateSpeedBoost(int tiky) {
+
+    }
+
     public int getFaza() {
         return this.faza;
     }
@@ -218,8 +224,9 @@ public class Boss extends Ai implements Postava {
     }
     @Override
     public void paint(Graphics g) {
-
+        g.drawImage(this.getObrazok(), this.getX(), this.getY(), this.getSirka(), this.getVyska(), null);
     }
+
     @Override
     public boolean dotyk(HernyObjekt o) {
         return this.koliduje(o);

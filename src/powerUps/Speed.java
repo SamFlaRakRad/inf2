@@ -29,9 +29,7 @@ public class Speed extends PowerUp {
      */
     @Override
     public void pouzi(Postava postava) {
-        if (postava instanceof Hrac) {
-            ((Hrac)postava).activateSpeedBoost(this.trvanie);
-        }
+        postava.activateSpeedBoost(this.trvanie);
         this.oznacZobrany();
     }
 

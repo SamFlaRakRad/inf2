@@ -88,4 +88,9 @@ public interface Postava {
      * Getter pre smer orientácie postavi ('L' = vľavo, 'R' = vpravo)
      */
     char getSmerObr();
+
+    /**
+     * Aktivuje booster pick-up u hráča
+     */
+    void activateSpeedBoost(int tiky);
 }

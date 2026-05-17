@@ -30,7 +30,7 @@ import java.util.Random;
  */
 public class Singleplayer extends RezimHry {
     private Hrac hrac;
-    private Postava protivnik;
+    private Ai protivnik;
     private boolean jeBoss;
 
     private int zacinajuceNaboje;
@@ -126,14 +126,14 @@ public class Singleplayer extends RezimHry {
 
         if (this.hrac != null && this.protivnik != null) {
             if (this.protivnik instanceof Boss) {
-                ((Boss)this.protivnik).setCiel(this.hrac);
+                this.protivnik.sledujCiel(this.hrac);
             } else if (this.protivnik instanceof Bot) {
                 ((Bot)this.protivnik).sledujCiel(this.hrac);
             }
         }
 
         if (this.protivnik != null) {
-            ((Ai)this.protivnik).nastavMapu(this.getMapa(), super.getVelkostS());
+            this.protivnik.nastavMapu(this.getMapa(), super.getVelkostS());
         }
     }
 
@@ -150,18 +150,18 @@ public class Singleplayer extends RezimHry {
         this.protivnik.pohybSa();
         if (this.protivnik instanceof Boss) {
             if (this.protivnik.getSmerObr() == 'L') {
-                ((HernyObjekt)this.protivnik).setObrazok(this.bossVlavo);
+                this.protivnik.setObrazok(this.bossVlavo);
             } else {
-                ((HernyObjekt)this.protivnik).setObrazok(this.bossVpravo);
+                this.protivnik.setObrazok(this.bossVpravo);
             }
         } else if (this.protivnik instanceof Bot) {
             if (this.protivnik.getSmerObr() == 'L') {
-                ((HernyObjekt)this.protivnik).setObrazok(this.botVlavo);
+                this.protivnik.setObrazok(this.botVlavo);
             } else {
-                ((HernyObjekt)this.protivnik).setObrazok(this.botVpravo);
+                this.protivnik.setObrazok(this.botVpravo);
             }
         }
-        super.pohybVSmere((HernyObjekt)this.protivnik, this.protivnik.getPohybX(), this.protivnik.getPohybY());
+        super.pohybVSmere(this.protivnik, this.protivnik.getPohybX(), this.protivnik.getPohybY());
 
 
     }
@@ -182,8 +182,7 @@ public class Singleplayer extends RezimHry {
 
     @Override
     public void spracujKoliziu(Iterator<Strela> it, Strela strela) {
-        HernyObjekt protObj = (HernyObjekt)this.protivnik;
-        if (strela.getStrana() == 0 && strela.koliduje(protObj)) {
+        if (strela.getStrana() == 0 && strela.koliduje(this.protivnik)) {
             this.protivnik.dostanZasah(this.poskodenieHraca);
             it.remove();
         } else if (strela.getStrana() == 1 && strela.koliduje(this.hrac)) {
@@ -220,10 +219,7 @@ public class Singleplayer extends RezimHry {
     @Override
     public void kresliPostavy(Graphics g) {
         this.hrac.paint(g);
-        HernyObjekt protObj = (HernyObjekt)this.protivnik;
-        Image img = protObj.getObrazok();
-        g.drawImage(img, protObj.getX(), protObj.getY(), protObj.getSirka(), protObj.getVyska(), null);
-
+        this.protivnik.paint(g);
     }
 
     @Override
@@ -305,7 +301,6 @@ public class Singleplayer extends RezimHry {
         this.nacitajSteny();
         this.getStrely().clear();
         this.nacitajPostavy();
-        ((Ai)this.protivnik).nastavMapu(this.getMapa(), super.getVelkostS());
         this.pridajPickupy();
         this.zasobnikHraca  = this.zacinajuceNaboje;
         this.hracVyhral = false;

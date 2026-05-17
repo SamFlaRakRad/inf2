@@ -105,6 +105,7 @@ public class Hrac extends HernyObjekt implements Postava {
         this.cooldown = 10;
     }
 
+    @Override
     public void activateSpeedBoost(int tiky) {
         this.rychlost = RYCHLOST_ZAKLADNA + RYCHLOST_BOOST;
         this.speedBoostTiky = tiky;

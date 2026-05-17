@@ -2,6 +2,8 @@ package powerUps;
 
 import players.Postava;
 
+import java.awt.*;
+
 /**
  * Interface Zberatelny - definuje rozhranie pre zberateľné objekty v hre.
  * Rozširujú ho powerupy (Heal, Speed) a iné objekty, ktoré môžu byť zbierané hráčom.
@@ -25,4 +27,9 @@ public interface Zberatelny {
      * Označí powerup ako zbratý - signalizuje, že by mal byť odstránený z mapy.
      */
     void oznacZobrany();
+
+    /**
+     *Vykresluje zberatelne itemi
+     */
+    void paint(Graphics g);
 }
